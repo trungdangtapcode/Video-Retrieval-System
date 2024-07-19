@@ -1,0 +1,6 @@
+conda create -n "myenv" python=3.11 ipython
+pip install fastapi==0.111.1
+conda config --append channels conda-forge
+conda install -c pytorch faiss-gpu -n <NAME>
+
+conda clean --all
