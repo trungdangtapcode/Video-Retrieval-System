@@ -1,28 +1,23 @@
 import faiss
-
-resource = [faiss.StandardGpuResources()]
-
+import clip
 import numpy as np
-d = 64                           # dimension
-nb = 1000000                      # database size
-nq = 10000                       # nb of queries
-np.random.seed(1234)             # make reproducible
-xb = np.random.random((nb, d)).astype('float32')
-xb[:, 0] += np.arange(nb) / 1000.
-xq = np.random.random((nq, d)).astype('float32')
-xq[:, 0] += np.arange(nq) / 1000.
 
+class FaissDB:
+    def __init__(self, bin_file_path, clip_backbone="ViT-B/32", device = "cuda"):
+        self.index = faiss.read_index(bin_file_path)
+        resource = [faiss.StandardGpuResources()]
+        self.index = faiss.index_cpu_to_gpu_multiple_py(resource, self.index)
+        self.model, _ = clip.load(clip_backbone, device=device)
+        self.device = device
 
-index = faiss.IndexFlatL2(d) 
+    def text_search(self, text: str, k: int):
+        text_tokens = clip.tokenize([text]).to(self.device)
+        text_features = self.model.encode_text(text_tokens).cpu().detach().numpy().astype(np.float32)
 
-print(index.is_trained)
-gindex = faiss.index_cpu_to_gpu_multiple_py(resource, index)
-gindex.add(xb)
-# gindex.add(xb)
-print(index.ntotal)
-k = 4                          # we want to see 4 nearest neighbors
-D, I = index.search(xb[:5], k) # sanity check
-print(I)
+        scores, idx_image = self.index.search(text_features, k=k)
+        idx_image = idx_image.squeeze()
 
-GD, GI = gindex.search(xb[:5], k)
-print(GI)
+        return idx_image
+
+db = FaissDB("index.bin")
+db.text_search('forest', 5)
