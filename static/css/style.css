@@ -64,4 +64,8 @@
     margin-top: 5px;
   }
   
-
+  .gridcontainer {
+    display: grid;
+    grid-template-columns: repeat(11, auto); /* Maximum 10+1 columns */
+    grid-gap: 1px; /* Adjust the gap between grid cells as needed */
+  }

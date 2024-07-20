@@ -18,6 +18,3 @@ class FaissDB:
         idx_image = idx_image.squeeze()
 
         return idx_image
-
-db = FaissDB("index.bin")
-db.text_search('forest', 5)
