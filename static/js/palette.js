@@ -5,6 +5,7 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
+    console.log('hi')
     ev.dataTransfer.setData("text", ev.target.id);
 }
 

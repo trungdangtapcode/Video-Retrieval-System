@@ -10,12 +10,14 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/toggle.css') }}" />
     <!-- <link rel="stylesheet" href="css/bootstrap.css" /> -->
 
-    <title>DMCS</title>
+    <link rel="icon" type="image/x-icon" href="{{url_for('static',path='img/favicon.png')}}">
+    <title>Trung đẹp trai vl ae</title>
   </head>
 
-  <body>
+  <body 
+    style="background-image: url('https://i.sstatic.net/kx8MT.gif'); background-size: cover;">
     <header>
-      <h1 class="teamname">DMCS</h1>
+      <h1 class="rainbow_text_animated"><b>DMCS</b></h1>
     </header>
     <main>
       <form id="request">
@@ -26,12 +28,14 @@
               name="scene_description"
               class="large-placeholder"
               placeholder="Describe the scene you are looking for..."
+              value = "{{scene_description}}"
             />
             <input
               type="text"
-              name="next_scene_description"
+              name="num_clip_query"
               class="large-placeholder"
-              placeholder="Describe the next scene (optional)..."
+              placeholder="Number of CLIP neareset"
+              value=24
             />
           </div>
         </div>
@@ -926,4 +930,5 @@
     </main>
   </body>
   <script src="{{url_for('static', path='/js/main.js')}}"></script>
+  <script src="{{url_for('static', path='/js/palette.js')}}"></script>
 </html>

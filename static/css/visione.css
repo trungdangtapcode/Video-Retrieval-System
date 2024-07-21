@@ -634,7 +634,8 @@ video::-webkit-media-controls {
 
 .gridcontainer {
   display: grid;
-  grid-template-columns: repeat(11, auto); /* Maximum 10+1 columns */
+  grid-template-columns: repeat(auto-fit, 150px); 
+  /* grid-template-columns: repeat(10, auto); /*Maximum 10+1 columns */
   grid-gap: 1px; /* Adjust the gap between grid cells as needed */
 }
 
