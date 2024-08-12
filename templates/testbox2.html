@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<style>
+    #topdiv{
+        box-sizing: border-box;
+        cursor: move;
+        position: absolute;
+        -webkit-border-radius: 5px 5px 0 0;
+        -moz-border-radius: 5px 5px 0 0;
+        -ms-border-radius: 5px 5px 0 0;
+        border-radius: 5px 5px 0 0;
+        z-index: 1001;
+        border-bottom-width: 0;
+        background: #666;
+        width: 600px;
+        height: 50px;
+    }
+    #leftdiv{
+        box-sizing: border-box;
+        cursor: move;
+        position: absolute;
+        background-color: #666;
+        z-index: 1001;
+        border: 0px solid #fff;
+        width: 20px;
+        height: 150px;
+        top: 50px;
+    }
+    #rightdiv{
+        box-sizing: border-box;
+        cursor: move;
+        position: absolute;
+        background-color: #666;
+        z-index: 1001;
+        border: 0px solid #fff;
+        width: 20px;
+        height: 150px;
+        top: 50px;
+        margin-left: 580px;
+    }
+    #bottomdiv{
+        box-sizing: border-box;
+        cursor: move;
+        position: absolute;
+        background-color: #666;
+        -webkit-border-radius:  0 0 5px 5px;
+        -moz-border-radius:  0 0 5px 5px;
+        -ms-border-radius:  0 0 5px 5px;
+        border-radius:  0 0 5px 5px;
+        z-index: 1001;
+        border-bottom-width: 0;
+        width: 600px;
+        height: 60px;
+        top: 200px;
+    }
+
+#movecursor{
+    height: 25px;
+    width: 560px;
+    background: red;
+    position: absolute;
+    cursor: move;
+    box-sizing: border-box;
+    background-color: #9f9f9f;
+    border: 1px solid #fff;
+    border-top-width: 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: flex-end;
+    -moz-box-align: flex-end;
+    -ms-flex-align: flex-end;
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+    -webkit-box-align: end;
+    -moz-box-align: end;
+    -ms-flex-align: end;
+    -webkit-box-pack: space-between;
+    -moz-box-pack: space-between;
+    -ms-flex-pack: space-between;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    z-index: 1002;
+    top: 200px;
+    margin-left: 20px;
+   
+}
+.glyphicon-move{
+    margin: auto;
+}
+.glyphicon-resize-small{
+    background: #eee;
+    height: 24px;
+    top: 0;
+    width: 24px;
+    padding-top: 5px;
+    cursor: se-resize;
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+    top: auto;
+}
+
+
+#mydiv {
+  position: absolute;
+  z-index: 9;
+  text-align: center;
+}
+
+</style>
+</head>
+<body>
+    
+
+   
+    <div id="mydiv">
+        
+           <div id="topdiv"></div>
+            <div id="leftdiv"></div>
+            <div id="movecursor"><i class="glyphicon glyphicon-move"></i><i id="inResize" class="glyphicon glyphicon-resize-small"></i></div>
+            <div id="rightdiv"></div>
+            <div id="bottomdiv"><i id="outResize" class="glyphicon glyphicon-resize-small"></i></div>
+         </div>
+     
+</body>
+<script>
+
+dragElement(document.getElementById("topdiv"),document.getElementById("mydiv"));
+dragElement(document.getElementById("bottomdiv"),document.getElementById("mydiv"));
+dragElement(document.getElementById("leftdiv"),document.getElementById("mydiv"));
+dragElement(document.getElementById("rightdiv"),document.getElementById("mydiv"));
+
+dragInner(document.getElementById("movecursor"));
+resizeInner(document.getElementById("inResize"));
+resizeOuter(document.getElementById("outResize"));
+var minUnit=10;
+function resizeInner(elmnt){  
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elmnt.onmousedown = dragMouseDown;
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX; console.log(pos3);
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElementExtra;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+        document.getElementById("movecursor").onmousedown=null;
+        
+    }
+    function closeDragElementExtra(){
+        document.onmouseup = null;
+        document.onmousemove = null;
+        dragInner(document.getElementById("movecursor"));
+    }
+
+  function elementDrag(e) { 
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+   
+    //get height and div of respective divs
+    
+    var top = document.getElementById("topdiv");
+    var bottom = document.getElementById("bottomdiv");
+    var left = document.getElementById("leftdiv");
+    var right = document.getElementById("rightdiv");
+    var cursor = document.getElementById("movecursor");
+    var outResize=document.getElementById("outResize");
+   
+    if(pos2>0){ // Y axis
+       if(left.getBoundingClientRect().height-pos2>=minUnit*2){//console.log('last2');
+            right.style.height=(right.getBoundingClientRect().height-pos2) + "px";
+            left.style.height=(left.getBoundingClientRect().height-pos2)+'px';
+            cursor.style.top=(cursor.offsetTop-pos2)+'px';
+            bottom.style.top=(bottom.offsetTop-pos2)+'px';
+            bottom.style.height=(bottom.getBoundingClientRect().height+pos2) + "px";
+            
+        }
+        else if(top.getBoundingClientRect().height-pos2>=minUnit+2){ //console.log('last3');
+            top.style.height=(top.getBoundingClientRect().height-pos2) + "px";
+            left.style.top=(left.offsetTop-pos2)+'px';
+            right.style.top=(right.offsetTop-pos2)+'px';
+            cursor.style.top=(cursor.offsetTop-pos2)+'px';
+            bottom.style.top=(bottom.offsetTop-pos2)+'px';
+            bottom.style.height=(bottom.getBoundingClientRect().height+pos2) + "px";
+        }
+    }
+    else if(pos2<0 ){
+        if(cursor.getBoundingClientRect().height*2+minUnit<= bottom.getBoundingClientRect().height ){
+            bottom.style.height=(bottom.getBoundingClientRect().height+pos2) + "px";
+            left.style.height=(left.getBoundingClientRect().height-pos2) + "px";
+            right.style.height=(right.getBoundingClientRect().height-pos2) + "px";
+            bottom.style.top=(bottom.offsetTop-pos2)+'px';
+            cursor.style.top=(cursor.offsetTop-pos2)+'px';
+        }
+    }
+//if(pos1<=10 && pos1>=-10){ 
+    if(pos1>0){ // X axis
+        if(cursor.getBoundingClientRect().width-pos1>150){ //console.log('>150');
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            cursor.style.width =(cursor.getBoundingClientRect().width-pos1)+'px';
+            right.style.width=(right.getBoundingClientRect().width+pos1) + "px";
+        }
+        else if(left.getBoundingClientRect().width-pos1>minUnit+2 ){
+            left.style.width=(left.getBoundingClientRect().width-pos1) + "px";
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            right.style.width=(right.getBoundingClientRect().width+pos1) + "px";
+            cursor.style.marginLeft =(cursor.offsetLeft-pos1)+'px';
+        }
+    }
+    else if(pos1<0 ){  
+        if(right.getBoundingClientRect().width+pos1>=minUnit+2){
+            right.style.width=(right.getBoundingClientRect().width+pos1) + "px";
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            cursor.style.width =(cursor.getBoundingClientRect().width-pos1)+'px';
+        }
+        /*else{ // uncomment this to expand outer div syncronisly
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            top.style.width=(top.getBoundingClientRect().width-pos1) + "px";
+            bottom.style.width=(bottom.getBoundingClientRect().width-pos1) + "px";
+        }*/
+        
+      
+    }
+
+    }
+}
+
+function resizeOuter(elmnt){  
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elmnt.onmousedown = dragMouseDown;
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX; 
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElementExtra;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+        document.getElementById("bottomdiv").onmousedown=null;
+        
+    }
+    function closeDragElementExtra(){
+        document.onmouseup = null;
+        document.onmousemove = null;
+        dragElement(document.getElementById("bottomdiv"),document.getElementById("mydiv"));
+    }
+
+  function elementDrag(e) { 
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    //console.log(e.clientY+" "+pos4+" "+pos2);
+    //get height and div of respective divs
+    
+    var top = document.getElementById("topdiv");
+    var bottom = document.getElementById("bottomdiv");
+    var left = document.getElementById("leftdiv");
+    var right = document.getElementById("rightdiv");
+    var cursor = document.getElementById("movecursor");
+    var outResize=document.getElementById("outResize");
+    
+    if(pos2>0){ // Y axis
+       if(cursor.getBoundingClientRect().height*2+minUnit<= bottom.getBoundingClientRect().height){//console.log(23);
+            bottom.style.height=(bottom.getBoundingClientRect().height-pos2) + "px";
+        }
+        else if(left.getBoundingClientRect().height-pos2>=minUnit+2){//console.log('last');
+            if(top.getBoundingClientRect().height-pos2>=minUnit+2 ){
+                top.style.height=(top.getBoundingClientRect().height-pos2) + "px";
+                left.style.top=(left.offsetTop-pos2)+'px';
+                right.style.top=(right.offsetTop-pos2)+'px';
+            }
+            else{
+                left.style.height=(left.getBoundingClientRect().height-pos2) + "px";
+                right.style.height=(right.getBoundingClientRect().height-pos2) + "px";
+            }
+            bottom.style.top=(bottom.offsetTop-pos2)+'px';
+            cursor.style.top=(cursor.offsetTop-pos2)+'px';
+        }
+    }
+    else if(pos2<0 && bottom.getBoundingClientRect().top+bottom.getBoundingClientRect().height-pos2<window.innerHeight){
+        bottom.style.height=(bottom.getBoundingClientRect().height-pos2) + "px";
+    }
+    if(pos1>0){ // X axis
+        if(right.getBoundingClientRect().width-pos1>minUnit+1  ){ console.log(1);
+            bottom.style.width=(bottom.getBoundingClientRect().width-pos1) + "px";
+            top.style.width=(top.getBoundingClientRect().width-pos1) + "px";
+            right.style.width=(right.getBoundingClientRect().width-pos1) + "px";
+        }
+        else if(cursor.getBoundingClientRect().width-pos1>150){console.log(2);
+            bottom.style.width=(bottom.getBoundingClientRect().width-pos1) + "px";
+            top.style.width=(top.getBoundingClientRect().width-pos1) + "px";
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            cursor.style.width =(cursor.getBoundingClientRect().width-pos1)+'px';
+        }
+        else if(left.getBoundingClientRect().width-pos1>minUnit+1){console.log(3);
+            left.style.width=(left.getBoundingClientRect().width-pos1) + "px";
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            right.style.width=(right.getBoundingClientRect().width+pos1) + "px";
+            cursor.style.marginLeft =(cursor.offsetLeft-pos1)+'px';
+        }
+    }
+    else if(pos1<0 && bottom.getBoundingClientRect().left+bottom.getBoundingClientRect().width-pos1<window.outerWidth){
+        bottom.style.width=(bottom.getBoundingClientRect().width-pos1) + "px";
+        top.style.width=(top.getBoundingClientRect().width-pos1) + "px";
+        right.style.width=(right.getBoundingClientRect().width-pos1) + "px";
+    }
+
+    }
+}
+
+
+function dragInner(elmnt){
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  elmnt.onmousedown = dragMouseDown;
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    
+    var top = document.getElementById("topdiv");
+    var bottom = document.getElementById("bottomdiv");
+    var left = document.getElementById("leftdiv");
+    var right = document.getElementById("rightdiv");
+    var cursor = document.getElementById("movecursor");
+    var outResize=document.getElementById("outResize");
+    var tmp=bottom.getBoundingClientRect().height-cursor.getBoundingClientRect().height; //console.log(tmp);//&& tmp>=outResize.offsetHeight
+    if(pos2){
+        
+        if(pos2>0){ //up Y
+            if(top.getBoundingClientRect().height-pos2>minUnit ){
+                top.style.height=top.getBoundingClientRect().height-pos2 + "px";
+                cursor.style.top=(cursor.offsetTop-pos2)+'px';
+                left.style.top=(left.offsetTop-pos2)+'px';
+                right.style.top=(right.offsetTop-pos2)+'px';
+                bottom.style.height=(bottom.getBoundingClientRect().height+pos2) + "px";
+                bottom.style.top=(bottom.offsetTop-pos2) + "px";
+            }
+        }
+        else if(pos2<0){ //down Y
+            if(cursor.getBoundingClientRect().height*2+minUnit/2<= bottom.getBoundingClientRect().height){
+                top.style.height=top.getBoundingClientRect().height-pos2 + "px";
+                cursor.style.top=(cursor.offsetTop-pos2)+'px';
+                left.style.top=(left.offsetTop-pos2)+'px';
+                right.style.top=(right.offsetTop-pos2)+'px';
+                bottom.style.height=(bottom.getBoundingClientRect().height+pos2) + "px";
+                bottom.style.top=(bottom.offsetTop-pos2) + "px";
+            }
+
+        }
+        
+    }
+    // console.log(e.clientX+" "+pos3+" "+pos1);
+    //console.log('x='+left.offsetWidth+ " "+right.offsetWidth+" ");
+    if(pos1 && left.offsetWidth>minUnit && right.offsetWidth>minUnit){  console.log(23);
+        if(left.getBoundingClientRect().width-pos1>=minUnit+1 && right.getBoundingClientRect().width+pos1*2>=minUnit+1){
+            left.style.width=(left.getBoundingClientRect().width-pos1) + "px";
+            
+            right.style.width=(right.getBoundingClientRect().width+pos1) + "px";
+            right.style.marginLeft =(right.offsetLeft-pos1)+'px';
+            
+            cursor.style.marginLeft =(cursor.offsetLeft-pos1)+'px';
+            
+        }
+    }
+
+            
+  }
+
+
+}
+
+function dragElement(elmnt,elmntParent) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  elmnt.onmousedown = dragMouseDown;
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+   //get height and div of parent div
+   var divWidth = document.getElementById("topdiv").offsetWidth;
+    var divHeight = document.getElementById("topdiv").offsetHeight+document.getElementById("leftdiv").offsetHeight+document.getElementById("bottomdiv").offsetHeight;
+
+    // set the element's new position:
+    if((elmntParent.offsetTop - pos2+divHeight)<window.innerHeight && (elmntParent.offsetTop - pos2)>0)
+        elmntParent.style.top = (elmntParent.offsetTop - pos2) + "px";
+    if((elmntParent.offsetLeft - pos1+divWidth)<window.outerWidth && elmntParent.offsetLeft - pos1>0)
+        elmntParent.style.left = (elmntParent.offsetLeft - pos1) + "px";
+    
+    
+  }
+
+  
+}
+function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+    
+
+</script>
+</html>

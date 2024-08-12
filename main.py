@@ -17,13 +17,19 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB("index.bin")
+# db = utils.myfaiss.FaissDB("index.bin")
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
 imgidx2path = {}
+imgidx2thumbnailidx = {}
+thumbnailidx2imgidx =  {}
+thumbnailidx2path = {}
 for key, value in json_dict.items():
-   imgidx2path[int(key)] = value
+    imgidx2path[int(key)] = value
+    imgidx2thumbnailidx[int(key)] = int(key)
+    thumbnailidx2imgidx[int(key)] = [int(key)]
+thumbnailidx2path = imgidx2path
 
 app.mount("/palette", StaticFiles(directory="static/palette"), name="home")
 app.mount("/concac", StaticFiles(directory="static"), name="static")
@@ -35,6 +41,7 @@ async def root():
 
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request, scene_description: str|None = None, num_clip_query: int = 24):
+    return
     if (scene_description != None):
         img_idx = db.text_search(scene_description,num_clip_query)
         # print(img_idx)
@@ -65,4 +72,11 @@ templates = Jinja2Templates(directory="templates")
 async def read_item(request: Request, id: str):
     return templates.TemplateResponse(
         request=request, name="item.html", context={"id": id}
+    )
+
+
+@app.get("/test", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="test.html", context={"id": id, "scene_description":"nam mo"}, data = "con cac"
     )
