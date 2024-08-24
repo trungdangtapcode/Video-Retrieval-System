@@ -78,5 +78,5 @@ async def read_item(request: Request, id: str):
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse(
-        request=request, name="test.html", context={"id": id, "scene_description":"nam mo"}, data = "con cac"
+        request=request, name="home.html", context={"id": id, "scene_description":"nam mo"}, data = "con cac"
     )

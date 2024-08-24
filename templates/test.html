@@ -7,6 +7,10 @@
   height: 300px;
   padding: 10px;
   border: 1px solid #aaaaaa;
+  background-size: 12.5% 12.5%;
+  background-image:
+    linear-gradient(to right, grey 1px, transparent 1px),
+    linear-gradient(to bottom, grey 1px, transparent 1px);
 }
 .dragbox {
   width: 50px;
@@ -74,7 +78,7 @@ asdasd
   y_diff = 0
   draggedItem = null;
   whiteboard = document.getElementById("whiteboard");
-  num2char = ['a','b','c','d']
+  num2char = ['a','b','c','d','e','f','g','h']
   
   function drag(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
@@ -118,11 +122,11 @@ asdasd
       y = (rect.top-wb.top)/wb.height
       u = (rect.right-wb.left)/wb.width
       v = (rect.bottom-wb.top)/wb.height
-      for (var nx = 0; nx < 4; nx++) for (var ny = 0; ny < 4; ny++){
-        bx = nx/4
-        by = ny/4
-        bu = (nx+1)/4
-        bv = (ny+1)/4
+      for (var nx = 0; nx < 8; nx++) for (var ny = 0; ny < 8; ny++){
+        bx = nx/8
+        by = ny/8
+        bu = (nx+1)/8
+        bv = (ny+1)/8
         if (!(x<bu&&y<bv&&u>bx&&v>by)) continue;
         // console.log(nx,ny,bbox.getAttribute('palette_name'))
         res += `${nx+1}${num2char[ny]}_${bbox.getAttribute('palette_name')} `
