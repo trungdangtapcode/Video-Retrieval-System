@@ -24,6 +24,7 @@ function createElementFromHTML(htmlString) {
 
 function loadData(){
     jsonFile = getJSON('data.json');
+    console.log(jsonFile)
     grid = document.getElementById('imgGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         htmlDOM = get_DOM_from_index(frame_data['frame_index'])
