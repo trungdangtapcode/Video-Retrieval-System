@@ -1,7 +1,7 @@
 import faiss
 # import clip
 import numpy as np
-from utils.embeddingserver import text_feature
+from utils.embeddingserver import text_feature, image_feature_file, image_feature_url
 
 class FaissDB:
     def __init__(self, bin_file_path, clip_backbone="ViT-B/32", device = "cuda"):
@@ -26,6 +26,34 @@ class FaissDB:
 
         return idx_image
     
+    def image_search(self, image, k: int):
+        # text_tokens = clip.tokenize([text]).to(self.device)
+        # text_features = self.model.encode_text(text_tokens).cpu().detach().numpy().astype(np.float32)
+        image_features = image_feature_file(image)
+        norm = np.linalg.norm(image_features)
+        if (norm!=0):
+            image_features /= norm
+        
+
+        scores, idx_image = self.index.search(image_features, k=k)
+        idx_image = idx_image.squeeze()
+
+        return idx_image
+    
+    def url_search(self, image, k: int):
+        # text_tokens = clip.tokenize([text]).to(self.device)
+        # text_features = self.model.encode_text(text_tokens).cpu().detach().numpy().astype(np.float32)
+        image_features = image_feature_url(image)
+        norm = np.linalg.norm(image_features)
+        if (norm!=0):
+            image_features /= norm
+        
+
+        scores, idx_image = self.index.search(image_features, k=k)
+        idx_image = idx_image.squeeze()
+
+        return idx_image
+
     def vec_search(self, vec, k: int):
         # text_tokens = clip.tokenize([text]).to(self.device)
         # text_features = self.model.encode_text(text_tokens).cpu().detach().numpy().astype(np.float32)

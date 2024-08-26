@@ -29,7 +29,11 @@ function createElementFromHTML(htmlString) {
   }
 
   function loadData(){
-    jsonFile = getJSON('data.json');
+    if (data_reponse&&data_reponse.length!=0){
+        jsonFile = data_reponse
+    } else {
+        jsonFile = getJSON('data.json')
+    }
     grid = document.getElementById('imgGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         //'let' not 'var': scope moment :D
@@ -51,7 +55,7 @@ loadData()
 // url/text
 
 
-document.getElementById("request").addEventListener("submit", function(eventObj) {
+document.getElementById("request").addEventListener("submit", async function(eventObj) {
     select_box = document.getElementById("query-type");
     if (select_box.value=='image'){
         image = document.getElementById("image-file").files[0]
@@ -62,10 +66,10 @@ document.getElementById("request").addEventListener("submit", function(eventObj)
         }
         let formData = new FormData();
         formData.append("image", image);
-        fetch('/upload_image', {method: "POST", 
+        await fetch('/upload_image', {method: "POST", 
             body: formData});
-        eventObj.preventDefault();
-        return false
+        // eventObj.preventDefault();
+        return true
     }
     // if (queryType!=null){
     //     // eventObj.preventDefault();
@@ -144,4 +148,4 @@ function bbox_submit(){
     return res
 
 }
-window.bbox_submit = bbox_submit
+// window.bbox_submit = bbox_submit

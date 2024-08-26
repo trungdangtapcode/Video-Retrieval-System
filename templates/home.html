@@ -33,7 +33,8 @@
             <option value="CLIP" selected="selected">CLIP</option>
             <option value="ALIGN">ALIGN</option>
           </select>
-          <select id="query-type" name="query_type">
+          <select id="query-type" name="query_type"
+            style="font-size: 18px">
             <option value="text" selected="selected">Text query</option>
             <option value="url">URL query</option>
             <option value="image">Image query</option>
@@ -119,9 +120,11 @@
     </form>
   </main>
 </body>
-<script src="{{url_for('static', path='/js/main.js')}}"></script>
-<script src="{{url_for('static', path='/js/palette.js')}}"></script>
+
 <script>
+  //{&#34;} is {'} but JSON.parse only accept {"}
+  data_reponse =  "{{data_response}}".replaceAll(/&#34;/g,'"')
+  data_reponse = JSON.parse(data_reponse)
   select_box = document.getElementById("query-type");
   for (let item of select_box.options){
     if (item.value == "{{query_type}}"){
@@ -129,4 +132,6 @@
     }
   }
 </script>
+<script src="{{url_for('static', path='/js/main.js')}}"></script>
+<script src="{{url_for('static', path='/js/palette.js')}}"></script>
 </html>

@@ -6,6 +6,7 @@ import utils.myfaiss
 import utils.embeddingserver
 import json
 import numpy as np
+import validators
 
 
 EMBEDDING_SERVER = "http://192.168.0.106/"
@@ -58,13 +59,16 @@ async def home(request: Request, scene_description: str|None = None,
             num_clip_query: int = 24, url_query: str|None = None,
             query_type: str|None = None):
     img_idx = None
-    if (query_type=='url' and False):
-        global uploaded_img
-        pass
-    elif (scene_description != None):
+    global uploaded_img
+    if (query_type=='image' and uploaded_img != None):
+        img_idx = db.vec_search(uploaded_img_feature, num_clip_query)
+    if (query_type=='url' and validators.url(url_query)):
+        img_idx = db.url_search(url_query, num_clip_query)
+    if (query_type=='text' and scene_description != None):
         img_idx = db.text_search(scene_description,num_clip_query)
-        # print(img_idx)
-        data = []
+    
+    data = []
+    if (not img_idx is None):
         for idx in img_idx:
             # if (idx not in imgidx2path):
             #     continue
@@ -78,7 +82,8 @@ async def home(request: Request, scene_description: str|None = None,
         request=request, name="home.html", 
         context={"id": id, "scene_description":scene_description,
                 "num_clip_query": num_clip_query, "url_query": url_query,
-                "query_type": query_type}
+                "query_type": query_type, 
+                "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
 
@@ -90,7 +95,11 @@ async def thumbnail_template(request: Request, img_idx: int):
     print('thumbnail queried index: ',img_idx)
     path = 'keyframes_resized/'+keyframes_path[img_idx]
     return templates.TemplateResponse(
-        request=request, name="thumbnail_box.html", context={"thumbnail_path": path, "img_idx":img_idx}, data = "con cac"
+        request=request, name="thumbnail_box.html", 
+            context={"thumbnail_path": path, 
+                    "img_idx":img_idx,  
+                    "keyframe_path": 'keyframes/'+keyframes_path[img_idx]}
+                    , data = "con cac"
     )
 
 templates = Jinja2Templates(directory="templates")
@@ -102,10 +111,13 @@ async def read_item(request: Request, id: str):
 
 
 uploaded_img = None
+uploaded_img_feature = None
 @app.post("/upload_image")
 async def image_query_upload(image: UploadFile = File(...)):
-    global uploaded_img
+    global uploaded_img, uploaded_img_feature
     uploaded_img = image.file
+    uploaded_img_feature = utils.embeddingserver.image_feature_file(uploaded_img)
+    print(uploaded_img_feature)
     return {"filename": image.filename}
 
 @app.get("/test", response_class=HTMLResponse)
