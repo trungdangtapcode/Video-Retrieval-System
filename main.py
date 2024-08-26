@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,9 +9,11 @@ import numpy as np
 
 
 EMBEDDING_SERVER = "http://192.168.0.106/"
-BIN_ALIGN_PATH = "../preprocess/normalizedCLIP.index"
+BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 KEYFRAMES_JSON = "keyframes_path.json"
-KEYFRAMES_PATH = "../data/keyframes"
+DATA_PATH = "../data"
+KEYFRAMES_PATH = DATA_PATH+"/keyframes"
+RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 
@@ -45,15 +47,21 @@ keyframes_path = json.load(open(KEYFRAMES_JSON))
 app.mount("/palette", StaticFiles(directory="static/palette"), name="home")
 app.mount("/concac", StaticFiles(directory="static"), name="static")
 app.mount("/img", StaticFiles(directory="static/img"), name="img")
-app.mount("/data", StaticFiles(directory="../data"), name="data")
+app.mount("/data", StaticFiles(directory=DATA_PATH), name="data")
 
 @app.get("/")
 async def root():
     return "hello"
 
 @app.get("/home", response_class=HTMLResponse)
-async def home(request: Request, scene_description: str|None = None, num_clip_query: int = 24):
-    if (scene_description != None):
+async def home(request: Request, scene_description: str|None = None,
+            num_clip_query: int = 24, url_query: str|None = None,
+            query_type: str|None = None):
+    img_idx = None
+    if (query_type=='url' and False):
+        global uploaded_img
+        pass
+    elif (scene_description != None):
         img_idx = db.text_search(scene_description,num_clip_query)
         # print(img_idx)
         data = []
@@ -67,7 +75,11 @@ async def home(request: Request, scene_description: str|None = None, num_clip_qu
         print(data)
 
     return templates.TemplateResponse(
-        request=request, name="home.html", context={"id": id, "scene_description":scene_description}, data = "con cac"
+        request=request, name="home.html", 
+        context={"id": id, "scene_description":scene_description,
+                "num_clip_query": num_clip_query, "url_query": url_query,
+                "query_type": query_type}
+        , data = "con cac"
     )
 
 @app.get("/thumbnail_template/{img_idx}", response_class=HTMLResponse)
@@ -75,8 +87,8 @@ async def thumbnail_template(request: Request, img_idx: int):
     path = ""
     # if (img_idx in imgidx2path):
     #     path = imgidx2path[img_idx]
-    print(img_idx)
-    path = 'keyframes/'+keyframes_path[img_idx]
+    print('thumbnail queried index: ',img_idx)
+    path = 'keyframes_resized/'+keyframes_path[img_idx]
     return templates.TemplateResponse(
         request=request, name="thumbnail_box.html", context={"thumbnail_path": path, "img_idx":img_idx}, data = "con cac"
     )
@@ -88,6 +100,13 @@ async def read_item(request: Request, id: str):
         request=request, name="item.html", context={"id": id}
     )
 
+
+uploaded_img = None
+@app.post("/upload_image")
+async def image_query_upload(image: UploadFile = File(...)):
+    global uploaded_img
+    uploaded_img = image.file
+    return {"filename": image.filename}
 
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):

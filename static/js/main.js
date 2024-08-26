@@ -7,11 +7,17 @@ function getJSON(filename){
     return my_JSON_object
 }
 
-function get_DOM_from_index(image_index){
+function get_DOM_from_index(image_index, callback){
     var request = new XMLHttpRequest();
-    request.open("GET", "thumbnail_template/" + image_index, false);
+    // request.open("GET", "thumbnail_template/" + image_index, false);
+    request.open("GET", "thumbnail_template/" + image_index, true);
     request.send(null)
-    return createElementFromHTML(request.responseText)
+    request.onreadystatechange = function() {
+        if (request.readyState == 4 && request.status == 200) {
+            callback(createElementFromHTML(request.responseText))
+        }
+    }
+    // return createElementFromHTML(request.responseText)
 }
 
 function createElementFromHTML(htmlString) {
@@ -22,17 +28,55 @@ function createElementFromHTML(htmlString) {
     return div.firstChild;
   }
 
-function loadData(){
+  function loadData(){
     jsonFile = getJSON('data.json');
-    console.log(jsonFile)
     grid = document.getElementById('imgGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
-        htmlDOM = get_DOM_from_index(frame_data['frame_index'])
+        //'let' not 'var': scope moment :D
+        let htmlDOM = document.createElement('div')
         grid.appendChild(htmlDOM)
+        // setTimeout(()=>{
+        //     console.log('sd')
+        // },5000)
+        let callback = (DOM_value)=>{
+            htmlDOM.outerHTML = DOM_value.outerHTML
+        }
+        get_DOM_from_index(frame_data['frame_index'],callback)
+        // console.log('con cac')
     }
 }
 
 loadData()
+
+// url/text
+
+
+document.getElementById("request").addEventListener("submit", function(eventObj) {
+    select_box = document.getElementById("query-type");
+    if (select_box.value=='image'){
+        image = document.getElementById("image-file").files[0]
+        if (image==null){
+            alert('Please select an image')
+            eventObj.preventDefault();
+            return false;
+        }
+        let formData = new FormData();
+        formData.append("image", image);
+        fetch('/upload_image', {method: "POST", 
+            body: formData});
+        eventObj.preventDefault();
+        return false
+    }
+    // if (queryType!=null){
+    //     // eventObj.preventDefault();
+    //     var input = document.createElement("input");
+    //     input.type = "hidden";
+    //     input.name = "queryType";
+    //     input.value = queryType;
+    //     this.appendChild(input);
+    // }
+    return true;
+});
 
 function allowDrop(ev) {
     ev.preventDefault();
@@ -97,5 +141,7 @@ function bbox_submit(){
         }
     }
     console.log(res)
+    return res
 
 }
+window.bbox_submit = bbox_submit

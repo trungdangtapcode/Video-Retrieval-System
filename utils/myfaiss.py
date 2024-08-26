@@ -25,3 +25,16 @@ class FaissDB:
         idx_image = idx_image.squeeze()
 
         return idx_image
+    
+    def vec_search(self, vec, k: int):
+        # text_tokens = clip.tokenize([text]).to(self.device)
+        # text_features = self.model.encode_text(text_tokens).cpu().detach().numpy().astype(np.float32)
+        norm = np.linalg.norm(vec)
+        if (norm!=0):
+            vec /= norm
+        
+
+        scores, idx_image = self.index.search(vec, k=k)
+        idx_image = idx_image.squeeze()
+
+        return idx_image
