@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, Request, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -7,10 +7,22 @@ import utils.embeddingserver
 import json
 import numpy as np
 import validators
+from urllib.request import urlopen
+def check_valid_url(url):
+    if (validators.url(url)==False):
+        print('URL validation failed, trying urlopen...')
+    try:
+        u = urlopen(url)
+        u.close()
+        return True
+    except:
+        print('URL invalid')
+        return False
 
 
 EMBEDDING_SERVER = "http://192.168.0.106/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
+BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
 KEYFRAMES_JSON = "keyframes_path.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
@@ -29,7 +41,7 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH)
+db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -57,15 +69,18 @@ async def root():
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request, scene_description: str|None = None,
             num_clip_query: int = 24, url_query: str|None = None,
-            query_type: str|None = None):
+            query_type: str|None = None, idx_query: int|None = -1,
+            model_name: str|None = 'ALIGN'):
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
-        img_idx = db.vec_search(uploaded_img_feature, num_clip_query)
-    if (query_type=='url' and validators.url(url_query)):
-        img_idx = db.url_search(url_query, num_clip_query)
+        img_idx = db.vec_search(uploaded_img_feature, num_clip_query, model_name)
+    if (query_type=='url' and check_valid_url(url_query)):
+        img_idx = db.url_search(url_query, num_clip_query, model_name)
     if (query_type=='text' and scene_description != None):
-        img_idx = db.text_search(scene_description,num_clip_query)
+        img_idx = db.text_search(scene_description,num_clip_query, model_name)
+    if (query_type=='idx' and idx_query != None):
+        img_idx = db.idx_search(idx_query,num_clip_query, model_name)
     
     data = []
     if (not img_idx is None):
@@ -83,6 +98,8 @@ async def home(request: Request, scene_description: str|None = None,
         context={"id": id, "scene_description":scene_description,
                 "num_clip_query": num_clip_query, "url_query": url_query,
                 "query_type": query_type, 
+                "idx_query": idx_query,
+                "model_name": model_name,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
@@ -113,10 +130,13 @@ async def read_item(request: Request, id: str):
 uploaded_img = None
 uploaded_img_feature = None
 @app.post("/upload_image")
-async def image_query_upload(image: UploadFile = File(...)):
+async def image_query_upload(
+            model_name: str = Form(...), 
+            image: UploadFile = File(...)):
+    print('model_name_upload: ', model_name)
     global uploaded_img, uploaded_img_feature
     uploaded_img = image.file
-    uploaded_img_feature = utils.embeddingserver.image_feature_file(uploaded_img)
+    uploaded_img_feature = utils.embeddingserver.image_feature_file(uploaded_img, model_name)
     print(uploaded_img_feature)
     return {"filename": image.filename}
 

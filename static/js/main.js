@@ -53,9 +53,19 @@ function createElementFromHTML(htmlString) {
 loadData()
 
 // url/text
-
+function queryByIdx(idx){
+    form = document.getElementById('request')
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "idx_query";
+    input.value = idx;
+    form['query_type'].value = 'idx'
+    form.appendChild(input);
+    form.submit()
+}
 
 document.getElementById("request").addEventListener("submit", async function(eventObj) {
+    form = document.getElementById('request')
     select_box = document.getElementById("query-type");
     if (select_box.value=='image'){
         image = document.getElementById("image-file").files[0]
@@ -66,10 +76,18 @@ document.getElementById("request").addEventListener("submit", async function(eve
         }
         let formData = new FormData();
         formData.append("image", image);
+        formData.append("model_name", form['model_name'].value);
         await fetch('/upload_image', {method: "POST", 
             body: formData});
-        // eventObj.preventDefault();
-        return true
+        // alert('Image uploaded successfully')
+        eventObj.preventDefault(); //preven not working
+        return false
+    }
+    if (select_box.value=='url'&&
+        !isValidUrl(document.getElementById("url-textbox").value)){
+        alert('Please enter a valid URL')
+        eventObj.preventDefault();
+        return false
     }
     // if (queryType!=null){
     //     // eventObj.preventDefault();
@@ -149,3 +167,26 @@ function bbox_submit(){
 
 }
 // window.bbox_submit = bbox_submit
+
+
+const isValidUrl = urlString=> {
+    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
+  '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
+    if (!urlPattern.test(urlString)){
+        console.log('URL cant match pattern, try parse')
+        // return false;
+    }
+    let url;
+    try {
+        url = new URL(urlString);
+    } catch (_) {
+        console.log('URL cant parse')
+        return false;  
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:";
+}

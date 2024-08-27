@@ -29,7 +29,7 @@
           <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
             value={{num_clip_query}} size="50" style="width: 50px; padding: 10px; 
               height: 100%; font-size: 20px;" />
-          <select id="model" name="model">
+          <select id="model-name" name="model_name">
             <option value="CLIP" selected="selected">CLIP</option>
             <option value="ALIGN">ALIGN</option>
           </select>
@@ -38,6 +38,7 @@
             <option value="text" selected="selected">Text query</option>
             <option value="url">URL query</option>
             <option value="image">Image query</option>
+            <option value="idx" hidden>idx</option>
           </select>
         </div>
       </div>
@@ -71,7 +72,7 @@
 
                     <div class="qbeItem column-span-2">
                       <input type="hidden" value="" id="objId" />
-                      <input id="urlToUpload" name="url_query" type="text" size="34" value="{{url_query}}"
+                      <input id="url-textbox" name="url_query" type="text" size="34" value="{{url_query}}"
                         onsubmit="return true;" />
                       <input style="display: none" id="imageToUpload" name="imgFile" type="file" size="34" />
                     </div>
@@ -96,7 +97,8 @@
             </div>
           </div>
         </div>
-        <div class="contentGrid" id="content">
+        <div class="contentGrid" id="content"
+        style="height: 100%;">
           <div id="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
           </div>
@@ -117,6 +119,7 @@
           <div id="avsSubmittedTab" style="display: block"></div>
         </div>
       </div>
+      <input type="hidden" name="idx_query" value="{{idx_query}}"/>
     </form>
   </main>
 </body>
@@ -128,6 +131,12 @@
   select_box = document.getElementById("query-type");
   for (let item of select_box.options){
     if (item.value == "{{query_type}}"){
+      item.selected = true;
+    }
+  }
+  select_box = document.getElementById("model-name");
+  for (let item of select_box.options){
+    if (item.value == "{{model_name}}"){
       item.selected = true;
     }
   }
