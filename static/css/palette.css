@@ -8,7 +8,7 @@
     background-size: 12.5% 12.5%;
     background-image:
         linear-gradient(to right, grey 1px, transparent 1px),
-        linear-gradient(to bottom, grey 1px, transparent 1px);
+        linear-gradient(to bottom, grey 1px, white 1px);
   }
   .dragbox {
     width: 50px;

@@ -13,37 +13,44 @@
   <!-- <link rel="stylesheet" href="css/bootstrap.css" /> -->
 
   <link rel="icon" type="image/x-icon" href="{{url_for('static',path='img/favicon.png')}}">
-  <title>Trung đẹp trai vl ae</title>
+  <title>1 kg rau muong = 1 kg beef</title>
 </head>
 
 <body style="background-image: url('https://i.sstatic.net/kx8MT.gif'); background-size: cover;">
   <header>
-    <h1 class="rainbow_text_animated"><b>DMCS</b></h1>
+    <a href="credits"><h1
+    class="rainbow_text_animated"><b>DMCS©</b></h1>
+    </a>
   </header>
   <main>
     <form id="request">
-      <div class="headerGrid_del">
+      <div class="my_headerGrid">
         <div class="search-container">
           <input type="text" name="scene_description" class="large-placeholder"
             placeholder="Describe the scene you are looking for..." value="{{scene_description}}" />
           <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
             value={{num_clip_query}} size="50" style="width: 50px; padding: 10px; 
               height: 100%; font-size: 20px;" />
-          <select id="model-name" name="model_name">
-            <option value="CLIP" selected="selected">CLIP</option>
-            <option value="ALIGN">ALIGN</option>
-          </select>
-          <select id="query-type" name="query_type"
-            style="font-size: 18px">
-            <option value="text" selected="selected">Text query</option>
-            <option value="url">URL query</option>
-            <option value="image">Image query</option>
-            <option value="idx" hidden>idx</option>
-          </select>
+          <div class="select">
+            <select id="model-name" name="model_name">
+              <option value="CLIP" selected="selected">CLIP</option>
+              <option value="ALIGN">ALIGN</option>
+            </select>
+          </div>
+          <div class="select">
+            <select id="query-type" name="query_type"
+              style="font-size: 18px">
+              <option value="text" selected="selected">Text query</option>
+              <option value="url">URL query</option>
+              <option value="image">Image query</option>
+              <option value="idx" hidden>idx</option>
+              <option value="dinov2" hidden>dinov2</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="bodyGrid">
-        <div class="sidebarGrid" id="searchSidebar" style="width: 310px">
+        <div class="sidebarGrid" id="searchSidebar" style="width: 310px; height:100%;">
           <div class="advanced" style="display: block">
 
             <div id="whiteboard" ondrop="dropPalette(event)" ondragover="allowDrop(event)"></div>
@@ -66,8 +73,6 @@
                         URL</a>
                     </div>
                     <div class="qbeItem column-span-2">
-                      <b id="uploadText" style="display: none">Upload an image</b>
-                      <a href="#" id="uploadLink" onclick="changeQueryBySampleMod('upload')">Upload an image</a>
                     </div>
 
                     <div class="qbeItem column-span-2">

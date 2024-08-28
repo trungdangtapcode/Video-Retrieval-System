@@ -63,6 +63,16 @@ function queryByIdx(idx){
     form.appendChild(input);
     form.submit()
 }
+function queryByIdxDinov2(idx){
+    form = document.getElementById('request')
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "idx_query";
+    input.value = idx;
+    form['query_type'].value = 'dinov2'
+    form.appendChild(input);
+    form.submit()
+}
 
 document.getElementById("request").addEventListener("submit", async function(eventObj) {
     form = document.getElementById('request')
