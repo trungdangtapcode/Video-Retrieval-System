@@ -20,9 +20,10 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.0.106/"
+EMBEDDING_SERVER = "http://192.168.0.102/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
+BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"
 KEYFRAMES_JSON = "keyframes_path.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
@@ -41,7 +42,7 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH)
+db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -81,7 +82,9 @@ async def home(request: Request, scene_description: str|None = None,
         img_idx = db.text_search(scene_description,num_clip_query, model_name)
     if (query_type=='idx' and idx_query != None):
         img_idx = db.idx_search(idx_query,num_clip_query, model_name)
-    
+    if (query_type=='dinov2' and idx_query != None):
+        img_idx = db.idx_dinov2_search(idx_query,num_clip_query)
+
     data = []
     if (not img_idx is None):
         for idx in img_idx:
@@ -139,6 +142,12 @@ async def image_query_upload(
     uploaded_img_feature = utils.embeddingserver.image_feature_file(uploaded_img, model_name)
     print(uploaded_img_feature)
     return {"filename": image.filename}
+
+@app.get("/credits", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="credits.html", context={}, data = "con cac"
+    )
 
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):

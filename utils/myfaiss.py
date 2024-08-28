@@ -5,13 +5,15 @@ from utils.embeddingserver import text_feature, image_feature_file, image_featur
 
 class FaissDB:
     def __init__(self, bin_file_path_ALIGN,
-                bin_file_path_CLIP, clip_backbone="ViT-B/32", device = "cuda"):
+                bin_file_path_CLIP, bin_file_path_DINOv2,
+                clip_backbone="ViT-B/32", device = "cuda"):
         self.index = {}
         self.index['ALIGN'] = faiss.read_index(bin_file_path_ALIGN)
         self.index['CLIP'] = faiss.read_index(bin_file_path_CLIP)
         resource = [faiss.StandardGpuResources()]
         self.index['ALIGN'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['ALIGN'])
         self.index['CLIP'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['CLIP'])
+        self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
         # self.model, _ = clip.load(clip_backbone, device=device)
         # self.device = device
         print('Checking embedding server...')
@@ -79,6 +81,17 @@ class FaissDB:
             vec /= norm
         
         scores, idx_image = self.index[model_name].search(vec, k=k)
+        idx_image = idx_image.squeeze()
+
+        return idx_image
+
+    def idx_dinov2_search(self, idx, k:int):
+        vec = np.expand_dims(self.index_dinov2.reconstruct(idx), axis=0)
+        # norm = np.linalg.norm(vec)
+        # if (norm!=0):
+        #     vec /= norm
+        
+        scores, idx_image = self.index_dinov2.search(vec, k=k)
         idx_image = idx_image.squeeze()
 
         return idx_image
