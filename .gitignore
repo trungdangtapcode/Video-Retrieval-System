@@ -1,7 +1,7 @@
 static/thumbnail/*.jpg
 __pycache__/
 *.pth
-*.zip
 *.bin
 *.index
 *.json
+*.zip

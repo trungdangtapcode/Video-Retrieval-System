@@ -8,7 +8,8 @@
     width: 30%;
     height: 50%;
     padding: 20px;
-    margin: 20px;
+    /* margin: 20px; */
+    margin: 10px;
     border-radius: 10px;
   }
 .sidebarGrid {
@@ -29,15 +30,7 @@
   .font-tiny{
     font-size:12px;
   } 
-  .palette{
-    display: grid;
-    grid-template-columns: repeat(11,auto);
-    grid-gap:1px;
-  }
-  .palette img {
-    margin: auto;
-    width:24px;
-  }
+
   #overlay0 {
     position: absolute;
     display: none;
@@ -142,4 +135,5 @@ select::-ms-expand {
 }
 .my_headerGrid{
   background: #e1e1e1;
+  padding: -10px;
 }

@@ -51,6 +51,7 @@ function createElementFromHTML(htmlString) {
 }
 
 loadData()
+loadPallete()
 
 // url/text
 function queryByIdx(idx){
@@ -126,12 +127,13 @@ function dragPalette(ev) {
     var rect = draggedItem.getBoundingClientRect();
     x_diff = ev.clientX-rect.left;
     y_diff = ev.clientY-rect.top;
+    window.scrollTo(0, 0); 
 }
 
 function dropPalette(ev) {
+    defaultPaletteBox = window.defaultPaletteBox
+    //>draggedItem -> whiteboard
     ev.preventDefault();
-    // var data = ev.dataTransfer.getData("text");
-    // const clone = document.getElementById(data);
     var palette = draggedItem;
     if (!draggedItem.hasAttribute("copied")){
         palette = draggedItem.cloneNode(true);
@@ -141,13 +143,23 @@ function dropPalette(ev) {
     }
     palette.style.position = 'absolute';
     whiteboard.appendChild(palette);
+
+    //>set postision and size
     //palette.size wont update until append  
-    // palette.style.left = `${ev.clientX-palette.clientWidth/2}px`;
-    // palette.style.top = `${ev.clientY-palette.clientHeight/2}px`;
     palette.style.left = `${ev.clientX-x_diff}px`;
     palette.style.top = `${ev.clientY-y_diff}px`;
+    // let box = palette.getBoundingClientRect() => not work because not render
+    //client > offset (include border)
+    //cant assign value for right/bottom
+    if (!palette.hasAttribute("copied")){
+        palette.style.width = `${defaultPaletteBox.clientWidth}px`;
+        palette.style.height = `${defaultPaletteBox.clientHeight}px`;
+    }
+
+    //>set attribute
     palette.setAttribute("copied",'');
-    palette.childNodes[1].removeAttribute('hidden')
+    palette.childNodes[0].removeAttribute('hidden')
+    // IF ON WATAME AND XI: palette.childNodes[1].removeAttribute('hidden')
     palette.style.resize = 'both'
 }
 
@@ -177,6 +189,22 @@ function bbox_submit(){
 
 }
 // window.bbox_submit = bbox_submit
+
+// FACK GLOBAL: window.defaultPaletteBox = document.getElementsByClassName("dragbox")[0];
+function loadPallete(){
+    var palette_list = ['person','man','woman','human_face','musical_instrument','sports','skateboard','glasses','bicycle','motorcycle','car','truck','boat','parachute','airplane','bench','chair','sofa','building','umbrella','wine_glass','cup','dessert','cell_phone','television','laptop_computer','book','cat','dog','horse','bird','flower','tree']
+    palette_place = document.getElementById('palette-place')
+    for (const [_,palette_name] of palette_list.entries()){
+        let palette = document.createElement('div')
+        palette.className = 'dragbox'
+        palette.setAttribute('palette_name',palette_name)
+        palette.innerHTML = ''
+        palette.innerHTML += `<span id="close-btn" class="close-btn" onclick="this.parentElement.remove()" hidden="">×</span>`
+        palette.innerHTML += `<img draggable="true" ondragstart="dragPalette(event)" width="100%" height="100%" id="palette-img" src="concac/palette/${palette_name}.png">`
+        palette_place.appendChild(palette)
+    }
+    window.defaultPaletteBox = document.getElementsByClassName("dragbox")[2]
+}
 
 
 const isValidUrl = urlString=> {

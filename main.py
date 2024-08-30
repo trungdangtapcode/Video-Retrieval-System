@@ -68,10 +68,11 @@ async def root():
     return "hello"
 
 @app.get("/home", response_class=HTMLResponse)
-async def home(request: Request, scene_description: str|None = None,
-            num_clip_query: int = 24, url_query: str|None = None,
-            query_type: str|None = None, idx_query: int|None = -1,
-            model_name: str|None = 'ALIGN'):
+async def home(request: Request, scene_description: str|None = '',
+            num_clip_query: int = 24, url_query: str|None = '',
+            query_type: str|None = '', idx_query: int|None = -1,
+            num_show_query: int = 20,
+            model_name: str|None = 'CLIP', string_query: str|None = ''):
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
@@ -103,6 +104,8 @@ async def home(request: Request, scene_description: str|None = None,
                 "query_type": query_type, 
                 "idx_query": idx_query,
                 "model_name": model_name,
+                "string_query": string_query,
+                "num_show_query": num_show_query,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
