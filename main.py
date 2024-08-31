@@ -20,7 +20,7 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.0.102/"
+EMBEDDING_SERVER = "http://192.168.0.105/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
 BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"

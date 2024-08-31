@@ -207,6 +207,12 @@ function loadPallete(){
 }
 
 
+document.getElementById("num-show-query").addEventListener("change", function() { 
+    show = document.getElementById("num-show-query")
+    clip = document.getElementById("num-clip-query")
+    clip.value = Math.max(clip.value,show.value)
+});
+
 const isValidUrl = urlString=> {
     var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
