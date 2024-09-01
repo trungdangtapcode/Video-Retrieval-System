@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import utils.myfaiss
 import utils.embeddingserver
+import utils.ocr
 import json
 import numpy as np
 import validators
@@ -20,7 +21,7 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.0.105/"
+EMBEDDING_SERVER = "http://192.168.0.100/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
 BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"
@@ -28,8 +29,11 @@ KEYFRAMES_JSON = "keyframes_path.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
+OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
+utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
+utils.ocr.init()
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -79,19 +83,23 @@ async def home(request: Request, scene_description: str|None = '',
         img_idx = db.vec_search(uploaded_img_feature, num_clip_query, model_name)
     if (query_type=='url' and check_valid_url(url_query)):
         img_idx = db.url_search(url_query, num_clip_query, model_name)
-    if (query_type=='text' and scene_description != None):
+    if (query_type=='text' and scene_description != None and scene_description != ''):
         img_idx = db.text_search(scene_description,num_clip_query, model_name)
     if (query_type=='idx' and idx_query != None):
         img_idx = db.idx_search(idx_query,num_clip_query, model_name)
     if (query_type=='dinov2' and idx_query != None):
         img_idx = db.idx_dinov2_search(idx_query,num_clip_query)
+    if (query_type=='ocr' and string_query != ''):
+        img_idx = utils.ocr.get_ocr(string_query, num_clip_query)
 
     data = []
     if (not img_idx is None):
         for idx in img_idx:
             # if (idx not in imgidx2path):
             #     continue
-            data.append({'frame_index':idx, 'path': 'data/keyframes/'+keyframes_path[idx]})
+            data.append({'frame_index':idx, 
+                'path': 'data/keyframes/'+keyframes_path[idx]})
+
         # print(scene_description, data)
         with open('static/reponse/data.json', 'w') as f:
             json.dump(data, f, cls=NpEncoder)

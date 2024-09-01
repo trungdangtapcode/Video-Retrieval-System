@@ -33,7 +33,7 @@
               height: 100%; font-size: 20px;" id="num-clip-query" />
           <input type="number" name="num_show_query" class="large-placeholder" placeholder="Number of show on Web"
           value={{num_show_query}} size="50" style="width: 50px; padding: 10px; 
-            height: 100%; font-size: 20px;" id="num-show-query"/>
+            height: 100%; font-size: 20px; display: none;" id="num-show-query"/>
           <div class="select">
             <select id="model-name" name="model_name">
               <option value="CLIP" selected="selected">CLIP</option>
@@ -48,6 +48,7 @@
               <option value="image">Image query</option>
               <option value="idx" hidden>idx</option>
               <option value="dinov2" hidden>dinov2</option>
+              <option value="ocr">OCR</option>
             </select>
           </div>
         </div>
@@ -56,7 +57,7 @@
         <div class="search-container">
           <input type="text" name="string_query" class="large-placeholder"
             placeholder="OCR/ASR.. (string query)" value="{{string_query}}" />
-          <div class="select">
+          <div class="select" style="display: none;">
             <select id="ranking-type" name="ranking_type">
               <option value="ocr">OCR</option>
               <option value="asr">ASR</option>

@@ -8,8 +8,13 @@ human_face.png (humanface.png)
 
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
-
-
+======================================
+print(utils.ocr_bm25.get_sorted_idx("thuan phat",5))
+for id in utils.ocr_bm25.get_sorted_idx("thuan phat",10):
+    ocr_file = open(OCR_PATH)
+    corpus  = json.load(ocr_file)
+    print(corpus[id])
+=======================================
 function dropPalette(ev) {
     ev.preventDefault();
     // var data = ev.dataTransfer.getData("text");
