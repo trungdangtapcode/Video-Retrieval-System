@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 import utils.myfaiss
 import utils.embeddingserver
 import utils.ocr
+import utils.co_detr
 import json
 import numpy as np
 import validators
@@ -30,10 +31,13 @@ DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
+CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus"
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
 utils.ocr.init()
+utils.co_detr.DIRECTORY_INDEX = CODETR_DIRECTORY
+utils.co_detr.init()
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -46,7 +50,7 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
+# db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -75,7 +79,7 @@ async def root():
 async def home(request: Request, scene_description: str|None = '',
             num_clip_query: int = 24, url_query: str|None = '',
             query_type: str|None = '', idx_query: int|None = -1,
-            num_show_query: int = 20,
+            num_show_query: int = 20, od_query: str|None = '',
             model_name: str|None = 'CLIP', string_query: str|None = ''):
     img_idx = None
     global uploaded_img
@@ -91,7 +95,9 @@ async def home(request: Request, scene_description: str|None = '',
         img_idx = db.idx_dinov2_search(idx_query,num_clip_query)
     if (query_type=='ocr' and string_query != ''):
         img_idx = utils.ocr.get_ocr(string_query, num_clip_query)
-
+    if (query_type=='od' and od_query != ''):
+        img_idx = utils.co_detr.get_top_k(od_query, num_clip_query)    
+    
     data = []
     if (not img_idx is None):
         for idx in img_idx:
@@ -102,6 +108,7 @@ async def home(request: Request, scene_description: str|None = '',
 
         # print(scene_description, data)
         with open('static/reponse/data.json', 'w') as f:
+            print('WRITED')
             json.dump(data, f, cls=NpEncoder)
         print(data)
 

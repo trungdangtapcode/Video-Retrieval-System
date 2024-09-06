@@ -18,12 +18,23 @@ def get_ocr(query_str, limit):
     query_str = query_str.lower()
     # Search the index
     results = []
+    
     with ix.searcher() as searcher:
-        # query = QueryParser("content", ix.schema).parse(query_str)
         query = Phrase("content", query_str.split(' '))
-        results = searcher.search(query, limit=limit)
-        
-        # Print results
+        results = searcher.search(query, limit=limit)        
+        ids = [result.docnum for result in results]
         for result in results:
             print(" -OCR: ",result['content'])
-    return np.array([x.docnum for x in results])
+
+        query = QueryParser("content", ix.schema).parse(query_str)
+        # query = Phrase("content", query_str.split(' '))
+        results2 = searcher.search(query, limit=limit)
+        for result in results2:
+            if result.docnum not in ids:
+                ids.append(result.docnum)
+                print(" -OCR: ",result['content'])
+        # Print results
+        # for result in results:
+        #     print(" -OCR: ",result['content'])
+    # return np.array([x.docnum for x in results])
+    return np.array(ids)

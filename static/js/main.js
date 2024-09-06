@@ -184,9 +184,14 @@ function bbox_submit(){
         res += `${nx+1}${num2char[ny]}_${bbox.getAttribute('palette_name')} `
         }
     }
-    console.log(res)
-    return res
-
+    form = document.getElementById('request')
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "od_query";
+    input.value = res;
+    form['query_type'].value = 'od'
+    form.appendChild(input);
+    form.submit()
 }
 // window.bbox_submit = bbox_submit
 
