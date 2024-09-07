@@ -12,7 +12,9 @@ def init():
     ids = list(range(len(retriever.corpus)))
 
 def get_top_k(query: str, k: int):
-    query = query.lower()
+    print(query)
     query_tokens = bm25s.tokenize(query, stemmer=stemmer)
     results, scores = retriever.retrieve(query_tokens, corpus = ids, k=k)
-    return np.array(results)
+    value, _ = retriever.retrieve(query_tokens, corpus = retriever.corpus, k=k)
+    print(value)
+    return np.array(results[0])

@@ -22,7 +22,7 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.0.100/"
+EMBEDDING_SERVER = "http://192.168.0.103/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
 BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"
@@ -31,7 +31,7 @@ DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
-CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus"
+CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
@@ -50,7 +50,7 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-# db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
+db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -167,6 +167,8 @@ async def root(request: Request):
         request=request, name="credits.html", context={}, data = "con cac"
     )
 
+
+
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse(
@@ -177,3 +179,11 @@ async def root(request: Request):
 async def test_embedding():
     vec = utils.embeddingserver.text_feature("I love you baby")
     return json.dumps(vec, cls=NpEncoder)
+
+@app.get("/test_slide", response_class=HTMLResponse)
+async def root(request: Request,
+               id: int|None = 12):
+    
+    return templates.TemplateResponse(
+        request=request, name="slide.html", context={"id": 12}, data = "con cac"
+    )

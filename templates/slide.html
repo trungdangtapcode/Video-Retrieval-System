@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {box-sizing: border-box}
+html, body {height: 100%; background-color: antiquewhite;}
+body {font-family: Verdana, sans-serif; margin:0}
+.mySlides {
+    display: none;
+    max-width: 50%;
+    max-height: 100%;
+    overflow: hidden;
+    margin: auto;
+    position:relative;
+}
+
+img {vertical-align: middle;}
+
+/* Slideshow container */
+.slideshow-container {
+  height: 75%;
+  position: relative;
+  margin: auto;
+  /* overflow: auto; */
+  overflow: hidden;
+
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 0%; /* 50%*/
+  /* width: auto; */
+  width: 10%;
+  padding: 16px;
+  margin-top: -22px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  height: 100%;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* Caption text */
+.text {
+  color: white;
+  font-size: 15px;
+  padding: 8px 12px;
+  position: absolute;
+  /* bottom: 8px; */
+  top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+.gallery {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto; /* Enables horizontal scrolling */
+    white-space: nowrap; /* Prevents line breaks between images */
+    /* padding-bottom: 20px; */
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    /* align-self: bottom;
+    margin-top: auto;
+    margin-bottom: 0px; */
+    height: 23%;
+}
+
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+/* On smaller screens, decrease text size */
+@media only screen and (max-width: 300px) {
+  .prev, .next,.text {font-size: 11px}
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 10%); /* Adjust the number of columns and size */
+    grid-gap: 10px;
+}
+
+.grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4CAF50;
+    color: white;
+    height: 90%; /* Adjust the height */
+    font-size: 24px;
+    transition: transform 0.5s ease; /* Animation for movement */
+}
+
+.moving-left {
+    transform: translateX(-110%);
+}
+
+.moving-right {
+    transform: translateX(110%);
+}
+
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+<div class="slideshow-container">
+
+<div class="mySlides fade">
+  <div class="numbertext">1 / 3</div>
+  <img src="https://s.vndb.org/s/angel-bg.jpg" style="width:100%">
+  <div class="text">Caption Text</div>
+</div>
+
+<div class="mySlides fade">
+  <div class="numbertext">2 / 3</div>
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiVz3WiovZmHYWA5IcmNCtQ4v2XYKzNc47k9UbNUQ6ZOtAqvQepz4Z0X8DHCBDCGQ1tNYYSjuWnusgniZDaAF2WdU_44SHs50ETwBOhCeWDjfkVbVxt9OFo-Ev5aKcwabZa-ZsARy4rCew/s1920/1007881_ss_6035e99a9e281736f290874d647dfab11e21c97d.1920x1080.jpg" style="width:100%">
+  <div class="text">Caption Two</div>
+</div>
+
+<div class="mySlides fade">
+  <div class="numbertext">3 / 3</div>
+  <img src="https://s.vndb.org/s/angel-bg.jpg" style="width:100%">
+  <div class="text">Caption Three</div>
+</div>
+
+<a class="prev" onclick="moveLeft()">
+    <span style="vertical-align: middle;">❮</span>
+</a>
+<a class="next" onclick="moveRight()">❯</a>
+
+</div>
+<br>
+<div class="gallery grid-container"> 
+    <div class="grid-item">2</div>
+    <div class="grid-item">3</div>
+    <div class="grid-item">4</div>
+    <div class="grid-item">1</div>
+</div>
+
+<!-- <div style="text-align:center" style="display: none;">
+  <span class="dot" onclick="currentSlide(1)"></span> 
+  <span class="dot" onclick="currentSlide(2)"></span> 
+  <span class="dot" onclick="currentSlide(3)"></span> 
+</div> -->
+
+<script>
+let id = '{{id}}'
+const slides_len = 10;
+let slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+function moveLeft() {
+    plusSlides(-1)
+    const items = document.querySelectorAll('.grid-item');
+    for (let i = 0; i < items.length; i++) {
+        items[i].classList.remove('moving-right');
+        items[i].classList.add('moving-left');
+    }
+
+    setTimeout(() => {
+        items[0].parentNode.appendChild(items[0]);
+        items.forEach(item => item.classList.remove('moving-left'));
+    }, 100); // Matches the transition duration in CSS
+}
+
+function moveRight() {
+    plusSlides(1)
+    const items = document.querySelectorAll('.grid-item');
+    for (let i = 0; i < items.length; i++) {
+        items[i].classList.remove('moving-left');
+        items[i].classList.add('moving-right');
+    }
+    setTimeout(() => {
+        items[0].parentNode.insertBefore(items[items.length - 1], items[0]);
+        items.forEach(item => item.classList.remove('moving-right'));
+    }, 100); // Matches the transition duration in CSS
+}
+    
+
+function showSlides(n) {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}    
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";  
+  }
+  slides[slideIndex-1].style.display = "block";  
+  return
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  dots[slideIndex-1].className += " active";
+}
+document.addEventListener("keydown", (event) => {
+    console.log(event.key);
+    if (event.key === "ArrowLeft") {
+        moveLeft();
+    } else if (event.key === "ArrowRight") {
+        moveRight();
+    }
+});
+
+</script>
+
+</body>
+</html> 
