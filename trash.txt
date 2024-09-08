@@ -8,6 +8,20 @@ human_face.png (humanface.png)
 
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
+
+==================================
+for (let i = 0; i < num_keyframes; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.onclick = () => {
+            currentSlide(i+1);
+        }
+        document.querySelector('.gallery').appendChild(dot);
+    }
+    const items = document.querySelectorAll('.grid-item');
+    for (let i = 0; i < items.length; i++) {
+        items[i].innerHTML = video_keyframes_id[i];
+    }
 ======================================
 print(utils.ocr_bm25.get_sorted_idx("thuan phat",5))
 for id in utils.ocr_bm25.get_sorted_idx("thuan phat",10):

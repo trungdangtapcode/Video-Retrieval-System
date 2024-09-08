@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', path='css/queryByExample.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', path='css/toggle.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', path='css/palette.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/popup.css') }}" />
   <!-- <link rel="stylesheet" href="css/bootstrap.css" /> -->
 
   <link rel="icon" type="image/x-icon" href="{{url_for('static',path='img/favicon.png')}}">
@@ -153,6 +154,9 @@
       <input type="hidden" name="idx_query" value="{{idx_query}}"/>
     </form>
   </main>
+  <div id="popupOverlay" 
+         class="overlay-containeshowr ">
+  </div>
 </body>
 
 <script>

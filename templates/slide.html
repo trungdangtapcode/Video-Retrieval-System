@@ -37,7 +37,7 @@ img {vertical-align: middle;}
   position: absolute;
   top: 0%; /* 50%*/
   /* width: auto; */
-  width: 10%;
+  width: 25%;
   padding: 16px;
   margin-top: -22px;
   color: white;
@@ -110,7 +110,9 @@ img {vertical-align: middle;}
 .gallery {
     display: flex;
     justify-content: center;
-    overflow-x: auto; /* Enables horizontal scrolling */
+    /* overflow-x: auto;  */
+    /* Enables horizontal scrolling */
+    overflow-x: hidden;
     white-space: nowrap; /* Prevents line breaks between images */
     /* padding-bottom: 20px; */
     position: fixed;
@@ -135,19 +137,33 @@ img {vertical-align: middle;}
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(10, 10%); /* Adjust the number of columns and size */
+    grid-template-columns: repeat(11, 10%); /* Adjust the number of columns and size */
+    grid-template-rows: repeat(1, 100%);
+    grid-auto-flow: column;
     grid-gap: 10px;
 }
 
 .grid-item {
     display: flex;
+    /* display: inline-grid; */
     align-items: center;
     justify-content: center;
     background-color: #4CAF50;
     color: white;
     height: 90%; /* Adjust the height */
+    width: 100%;
     font-size: 24px;
-    transition: transform 0.5s ease; /* Animation for movement */
+    transition: transform 0.2s ease; /* Animation for movement */
+}
+.grid-item img {
+
+}
+.grid-item:hover {
+  transform: scale(1.2);
+}
+.grid-item.active{
+  /* transform: translateX(-110%) scale(1.2);*/
+  background-color: red;
 }
 
 .moving-left {
@@ -175,8 +191,9 @@ button {
 <body>
 
 <div class="slideshow-container">
-
-<div class="mySlides fade">
+  <div id = "slideshow-abstract-container">
+  </div>
+<!-- <div class="mySlides fade">
   <div class="numbertext">1 / 3</div>
   <img src="https://s.vndb.org/s/angel-bg.jpg" style="width:100%">
   <div class="text">Caption Text</div>
@@ -192,21 +209,24 @@ button {
   <div class="numbertext">3 / 3</div>
   <img src="https://s.vndb.org/s/angel-bg.jpg" style="width:100%">
   <div class="text">Caption Three</div>
+</div> -->
+
 </div>
 
 <a class="prev" onclick="moveLeft()">
-    <span style="vertical-align: middle;">❮</span>
+  <span style="vertical-align: middle;">❮</span>
 </a>
 <a class="next" onclick="moveRight()">❯</a>
-
-</div>
 <br>
 <div class="gallery grid-container"> 
-    <div class="grid-item">2</div>
+  <!-- <div id = "gallery-abstract-container">
+  </div> -->
+    <!-- <div class="grid-item">2</div>
     <div class="grid-item">3</div>
     <div class="grid-item">4</div>
-    <div class="grid-item">1</div>
+    <div class="grid-item">1</div> -->
 </div>
+
 
 <!-- <div style="text-align:center" style="display: none;">
   <span class="dot" onclick="currentSlide(1)"></span> 
@@ -215,20 +235,63 @@ button {
 </div> -->
 
 <script>
-let id = '{{id}}'
-const slides_len = 10;
-let slideIndex = 1;
-showSlides(slideIndex);
+const preload = 10
+const video_keyframes_path = JSON.parse("{{video_keyframes_path}}".replaceAll(/&#39;/g,'"'))
+const video_resized_keyframes_path = JSON.parse("{{video_resized_keyframes_path}}".replaceAll(/&#39;/g,'"'))
+const video_keyframes_id = JSON.parse("{{video_keyframes_id}}".replaceAll(/&#39;/g,'"'))
+const num_keyframes = video_keyframes_path.length
+// console.log(video_keyframes_id)
+const slides_len = 11;
+const middle = Math.floor((slides_len+1)/2)
+const range = middle-1
+init()
+var id = parseInt('{{id}}')
+var l, r
+update_range()
+
+function createElementFromHTML(htmlString) {
+  var div = document.createElement('div');
+  div.innerHTML = htmlString.trim();
+
+  // Change this to div.childNodes to support multiple top-level nodes.
+  return div.firstChild;
+}
+function init(){
+    let slideshow = document.querySelector('#slideshow-abstract-container');
+    let gallery = document.querySelector('.gallery');
+    slideshow.innerHTML = ''
+    gallery.innerHTML = ''
+    for (let i = 0; i < num_keyframes; i++) {
+      el = `<div class="grid-item" style='display:none'
+        onclick="currentSlide(${i})">
+        <img src=""
+        style='width:100%'>  
+      </div>`
+      gallery.appendChild(createElementFromHTML(el));
+      el = `<div class="mySlides fade">
+        <img src="" style="width:100%">
+        <div class="numbertext">${i+1} / ${num_keyframes}</div>
+        <div class="text">Con cac ba may</div>
+      </div>`
+      slideshow.appendChild(createElementFromHTML(el));
+    }
+}
+
+let slideIndex = middle;
+showSlides(id);
 
 function plusSlides(n) {
-  showSlides(slideIndex += n);
+  showSlides(id += n);
 }
 
 function currentSlide(n) {
-  showSlides(slideIndex = n);
+  // alert(n)
+  showSlides(id = n);
+  update_range()
 }
 function moveLeft() {
     plusSlides(-1)
+    update_range()
     const items = document.querySelectorAll('.grid-item');
     for (let i = 0; i < items.length; i++) {
         items[i].classList.remove('moving-right');
@@ -236,20 +299,21 @@ function moveLeft() {
     }
 
     setTimeout(() => {
-        items[0].parentNode.appendChild(items[0]);
+        // items[0].parentNode.appendChild(items[0]);
         items.forEach(item => item.classList.remove('moving-left'));
     }, 100); // Matches the transition duration in CSS
 }
 
 function moveRight() {
     plusSlides(1)
+    update_range()
     const items = document.querySelectorAll('.grid-item');
     for (let i = 0; i < items.length; i++) {
         items[i].classList.remove('moving-left');
         items[i].classList.add('moving-right');
     }
     setTimeout(() => {
-        items[0].parentNode.insertBefore(items[items.length - 1], items[0]);
+        // items[0].parentNode.insertBefore(items[items.length - 1], items[0]);
         items.forEach(item => item.classList.remove('moving-right'));
     }, 100); // Matches the transition duration in CSS
 }
@@ -259,26 +323,75 @@ function showSlides(n) {
   let i;
   let slides = document.getElementsByClassName("mySlides");
   let dots = document.getElementsByClassName("dot");
-  if (n > slides.length) {slideIndex = 1}    
-  if (n < 1) {slideIndex = slides.length}
+  if (n >= slides.length) {id = 0}    
+  if (n < 0) {id = slides.length-1}
   for (i = 0; i < slides.length; i++) {
     slides[i].style.display = "none";  
   }
-  slides[slideIndex-1].style.display = "block";  
+  slides[id].style.display = "block";  
   return
   for (i = 0; i < dots.length; i++) {
     dots[i].className = dots[i].className.replace(" active", "");
   }
-  dots[slideIndex-1].className += " active";
+  dots[id-1].className += " active";
 }
 document.addEventListener("keydown", (event) => {
-    console.log(event.key);
+    // console.log(event.key);
     if (event.key === "ArrowLeft") {
         moveLeft();
     } else if (event.key === "ArrowRight") {
         moveRight();
     }
 });
+
+function update_range(){
+  console.log(id)
+  l = Math.max(0, id - preload)
+  r = Math.min(num_keyframes-1, id + preload)
+  // console.log(l, r)
+  let gallery = document.querySelector('.gallery');  
+  let slideshow = document.querySelector('#slideshow-abstract-container');  
+  for (let i = gallery.children.length-1; i >= 0; i--){
+    child = gallery.children[i]
+    if (child.classList.contains('dummy')){
+      // console.log(child,gallery.children.remove)
+      gallery.removeChild(child)
+      // console.log('removed')
+    }
+  }
+  for (let i = l; i <= r; i++){
+    if (gallery.childNodes[i].childNodes[1].src=='') continue
+    gallery.childNodes[i].childNodes[1].src = video_resized_keyframes_path[i]
+    slideshow.childNodes[i].childNodes[1].src = video_keyframes_path[i]
+  }
+  for (let i = 0; i < num_keyframes; i++){
+    gallery.childNodes[i].style.display = 'none'
+    gallery.childNodes[i].classList.remove('active')
+  }
+  for (let i = id-range; i <= id+range; i++){
+    if (i < 0 || i >= num_keyframes) continue
+    gallery.childNodes[i].style.display = 'flex' //block
+  }
+  gallery.childNodes[id].classList.add('active')
+  for (let i = id-range; i <= id+range; i++){
+    if (i<0){
+      el = `<div class="grid-item dummy" style='display:block'>
+        <img src=""
+        style='width:100%'>  
+      </div>`
+      gallery.insertBefore(createElementFromHTML(el),gallery.childNodes[0]);
+      continue
+    }
+    if (i>=num_keyframes){
+      el = `<div class="grid-item dummy" style='display:block'>
+        <img src=""
+        style='width:100%'>  
+      </div>`
+      gallery.appendChild(createElementFromHTML(el));
+      continue
+    }
+  }
+}
 
 </script>
 

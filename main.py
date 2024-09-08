@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -77,7 +78,7 @@ async def root():
 
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request, scene_description: str|None = '',
-            num_clip_query: int = 24, url_query: str|None = '',
+            num_clip_query: int = 60, url_query: str|None = '',
             query_type: str|None = '', idx_query: int|None = -1,
             num_show_query: int = 20, od_query: str|None = '',
             model_name: str|None = 'CLIP', string_query: str|None = ''):
@@ -183,7 +184,21 @@ async def test_embedding():
 @app.get("/test_slide", response_class=HTMLResponse)
 async def root(request: Request,
                id: int|None = 12):
-    
+    video = utils.get_video_keyframe_path(keyframes_path[id])
+    current_index = utils.get_frame_number_in_video(keyframes_path[id])
+    video_keyframes_path = []
+    video_resized_keyframes_path = []
+    video_keyframes_id = []
+    for idx, frame in enumerate((os.listdir(KEYFRAMES_PATH+'/'+video))):
+        video_keyframes_path.append('data/keyframes/'+video+'/'+frame)
+        video_resized_keyframes_path.append('data/keyframes_resized/'+video+'/'+frame)
+        video_keyframes_id.append(current_index-current_index+idx)
+        
     return templates.TemplateResponse(
-        request=request, name="slide.html", context={"id": 12}, data = "con cac"
+        request=request, name="slide.html", context={
+            "id": current_index, 
+            "video_keyframes_path": video_keyframes_path,
+            "video_resized_keyframes_path": video_resized_keyframes_path,
+            "video_keyframes_id": video_keyframes_id
+            }, data = "con cac"
     )
