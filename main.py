@@ -81,31 +81,35 @@ async def home(request: Request, scene_description: str|None = '',
             num_clip_query: int = 60, url_query: str|None = '',
             query_type: str|None = '', idx_query: int|None = -1,
             num_show_query: int = 20, od_query: str|None = '',
+            next_scene_description: str|None = '',
             model_name: str|None = 'CLIP', string_query: str|None = ''):
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
-        img_idx = db.vec_search(uploaded_img_feature, num_clip_query, model_name)
+        img_idx, scores = db.vec_search(uploaded_img_feature, num_clip_query, model_name)
     if (query_type=='url' and check_valid_url(url_query)):
-        img_idx = db.url_search(url_query, num_clip_query, model_name)
+        img_idx, scores = db.url_search(url_query, num_clip_query, model_name)
     if (query_type=='text' and scene_description != None and scene_description != ''):
-        img_idx = db.text_search(scene_description,num_clip_query, model_name)
+        img_idx, scores = db.text_search(scene_description,num_clip_query, model_name)
     if (query_type=='idx' and idx_query != None):
-        img_idx = db.idx_search(idx_query,num_clip_query, model_name)
+        img_idx, scores = db.idx_search(idx_query,num_clip_query, model_name)
     if (query_type=='dinov2' and idx_query != None):
-        img_idx = db.idx_dinov2_search(idx_query,num_clip_query)
+        img_idx, scores = db.idx_dinov2_search(idx_query,num_clip_query)
     if (query_type=='ocr' and string_query != ''):
         img_idx = utils.ocr.get_ocr(string_query, num_clip_query)
+        scores = list(range(len(img_idx),0,-1))
     if (query_type=='od' and od_query != ''):
-        img_idx = utils.co_detr.get_top_k(od_query, num_clip_query)    
+        img_idx, scores = utils.co_detr.get_top_k(od_query, num_clip_query)    
     
     data = []
     if (not img_idx is None):
-        for idx in img_idx:
+        for idx, score in zip(img_idx,scores):
             # if (idx not in imgidx2path):
             #     continue
             data.append({'frame_index':idx, 
-                'path': 'data/keyframes/'+keyframes_path[idx]})
+                'path': 'data/keyframes/'+keyframes_path[idx],
+                'video': utils.get_video_keyframe_path(keyframes_path[idx]), 
+                'score': score})
 
         # print(scene_description, data)
         with open('static/reponse/data.json', 'w') as f:
@@ -136,7 +140,8 @@ async def thumbnail_template(request: Request, img_idx: int):
     return templates.TemplateResponse(
         request=request, name="thumbnail_box.html", 
             context={"thumbnail_path": path, 
-                    "img_idx":img_idx,  
+                    "img_idx":img_idx, 
+                    "video": utils.get_video_keyframe_path(keyframes_path[img_idx]), 
                     "keyframe_path": 'keyframes/'+keyframes_path[img_idx]}
                     , data = "con cac"
     )

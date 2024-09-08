@@ -17,4 +17,4 @@ def get_top_k(query: str, k: int):
     results, scores = retriever.retrieve(query_tokens, corpus = ids, k=k)
     value, _ = retriever.retrieve(query_tokens, corpus = retriever.corpus, k=k)
     print(value)
-    return np.array(results[0])
+    return np.array(results[0]), np.array(scores[0])

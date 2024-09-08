@@ -30,8 +30,9 @@ class FaissDB:
 
         scores, idx_image = self.index[model_name].search(text_features, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores
     
     def image_search(self, image, k: int, model_name: str):
         # text_tokens = clip.tokenize([text]).to(self.device)
@@ -43,8 +44,9 @@ class FaissDB:
         
         scores, idx_image = self.index[model_name].search(image_features, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores
     
     def url_search(self, image, k: int, model_name: str):
         # text_tokens = clip.tokenize([text]).to(self.device)
@@ -56,8 +58,9 @@ class FaissDB:
         
         scores, idx_image = self.index[model_name].search(image_features, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores
 
     def vec_search(self, vec, k: int, model_name: str):
         # text_tokens = clip.tokenize([text]).to(self.device)
@@ -69,8 +72,9 @@ class FaissDB:
 
         scores, idx_image = self.index[model_name].search(vec, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores
     
     def idx_search(self, idx, k: int, model_name: str):
         # text_tokens = clip.tokenize([text]).to(self.device)
@@ -82,8 +86,9 @@ class FaissDB:
         
         scores, idx_image = self.index[model_name].search(vec, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores
 
     def idx_dinov2_search(self, idx, k:int):
         vec = np.expand_dims(self.index_dinov2.reconstruct(idx), axis=0)
@@ -93,5 +98,6 @@ class FaissDB:
         
         scores, idx_image = self.index_dinov2.search(vec, k=k)
         idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
 
-        return idx_image
+        return idx_image, scores

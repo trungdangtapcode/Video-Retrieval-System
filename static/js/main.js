@@ -34,6 +34,18 @@ function createElementFromHTML(htmlString) {
     } else {
         jsonFile = getJSON('data.json')
     }
+    //count videos
+    keyframe_to_video = {}
+    video_grid = document.getElementById('videoGridResults')
+    for (const [idx, frame_data] of jsonFile.entries()) {
+        if (keyframe_to_video[frame_data['video']]==undefined){
+            el = createElementFromHTML(`<div id="imgGridResults" class="gridcontainer"></div>`)
+            keyframe_to_video[frame_data['video']] = el
+            video_grid.appendChild(el)
+            video_grid.appendChild(createElementFromHTML(`<div class="hline"></div>)`))
+        }
+    }
+
     grid = document.getElementById('imgGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         //'let' not 'var': scope moment :D
@@ -42,16 +54,51 @@ function createElementFromHTML(htmlString) {
         // setTimeout(()=>{
         //     console.log('sd')
         // },5000)
+        let htmlDOM2 = document.createElement('div')
+        keyframe_to_video[frame_data['video']].append(htmlDOM2)
         let callback = (DOM_value)=>{
             htmlDOM.outerHTML = DOM_value.outerHTML
+            htmlDOM2.outerHTML = DOM_value.outerHTML
         }
         get_DOM_from_index(frame_data['frame_index'],callback)
         // console.log('con cac')
     }
 }
 
+var displayStyle = 'keyframe'
 loadData()
 loadPallete()
+shortcut.add("CTRL+O", function(event) {
+    if (displayStyle=='keyframe'){
+        displayStyle = 'video'
+        document.getElementById('imgGridResults').style.display = 'none'
+        document.getElementById('videoGridResults').style.display = 'block'
+    } else {
+        displayStyle = 'keyframe'
+        document.getElementById('imgGridResults').style.display = 'grid'
+        document.getElementById('videoGridResults').style.display = 'none'
+    }
+});
+shortcut.add("CTRL+1", function() {
+    select_box = document.getElementById("query-type");
+    select_box.options[0].selected = true;
+});
+shortcut.add("CTRL+2", function() {
+    select_box = document.getElementById("query-type");
+    select_box.options[1].selected = true;
+});
+shortcut.add("CTRL+3", function() {
+    select_box = document.getElementById("query-type");
+    select_box.options[2].selected = true;
+});
+shortcut.add("CTRL+4", function() {
+    select_box = document.getElementById("query-type");
+    select_box.options[5].selected = true;
+});
+
+shortcut.add("F1", function() {
+    alert("F1 pressed");
+});
 
 // url/text
 function queryByIdx(idx){

@@ -58,7 +58,7 @@
       <div class="my_headerGrid">
         <div class="search-container">
           <input type="text" name="next_scene_description" class="large-placeholder"
-            placeholder="Describe next scene you are looking for..." value="{{scene_description}}" />
+            placeholder="Describe next scene you are looking for..." value="{{next_scene_description}}" />
           <input type="text" name="string_query" class="large-placeholder"
             placeholder="OCR/ASR.. (string query)" value="{{string_query}}" />
           <div class="select" style="display: none;">
@@ -75,7 +75,6 @@
       <div class="bodyGrid">
         <div class="sidebarGrid" id="searchSidebar" style="width: 310px; height:100%;">
           <div class="advanced" style="display: block">
-
             <div id="whiteboard" ondrop="dropPalette(event)" ondragover="allowDrop(event)"></div>
             <br>
             <div class="palette" id="palette-place">
@@ -91,7 +90,7 @@
               </div>
             </div>
             <div class="bbox-submit-button" onclick="bbox_submit()">Click Me</div>
-
+    
             <div class="headerItem">
               <div id="qbe" class="font-normal">
                 <div id="filter" class="advanced" style="display: block">
@@ -142,6 +141,7 @@
           <div id="resGrid" class="resGrid">
             <div id="results" class="resGrid2">
               <div id="imgGridResults" class="gridcontainer"></div>
+              <div id="videoGridResults" style="display:none"></div>
             </div>
             <ol id="recordingsList"></ol>
           </div>
@@ -196,6 +196,7 @@
   }
   window.closePopup = closePopup
 </script>
+<script src="{{url_for('static', path='/js/shortcut.js')}}"></script>
 <script src="{{url_for('static', path='/js/main.js')}}"></script>
 <script src="{{url_for('static', path='/js/palette.js')}}"></script>
 </html>

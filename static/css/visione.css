@@ -182,7 +182,7 @@ body {
 }
 .hline {
     border-bottom: 2px solid grey;
-    margin: 2px;
+    margin: 4px;
 }
 
 .videoSummarySelected {   border-width: 6px;   border-color: red;   border-style: dashed; }
