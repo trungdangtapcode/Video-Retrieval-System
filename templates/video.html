@@ -57,8 +57,8 @@
              "playbackRates": [1, 1.25, 1.5, 2, 5],
              "controlBar": {
                "skipButtons": {
-                 "backward": 5,
-                 "forward": 5
+                 "backward": 2,
+                 "forward": 2
                }
              }
            }' 
@@ -79,10 +79,10 @@
     // }, 0);
     document.addEventListener('keydown', (even)=>{
         if(even.key == 'ArrowRight'){
-            video.currentTime += 5
+            video.currentTime += 2
         }
         if(even.key == 'ArrowLeft'){
-            video.currentTime -= 5
+            video.currentTime -= 2
         }
         if (even.key == ' '){
             if(video.paused){

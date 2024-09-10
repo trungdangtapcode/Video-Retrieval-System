@@ -103,6 +103,11 @@ shortcut.add("CTRL+5", function() {
     select_box = document.getElementById("query-type");
     select_box.options[7].selected = true;
 });
+document.addEventListener('keydown',(event)=>{
+    if (event.key=='Escape'){
+        closePopup()
+    }
+});
 
 shortcut.add("F1", function() {
     alert("F1 pressed");

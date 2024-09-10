@@ -264,6 +264,7 @@ const range = middle-1
 const isPopup = window.parent.closePopup!=undefined
 queryByIdxDinov2 = window.parent.queryByIdxDinov2
 queryByIdx = window.parent.queryByIdx
+closePopup = window.parent.closePopup
 init()
 var id = parseInt('{{id}}')
 var l, r
@@ -437,6 +438,12 @@ shortcut.add("CTRL+S", function(event) {
 function show_toast(){
   toastr.success('Frame saved successfully');
 }
+
+document.addEventListener('keydown',(event)=>{
+    if (event.key=='Escape'){
+        closePopup()
+    }
+});
 </script>
 
 
