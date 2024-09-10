@@ -1,6 +1,6 @@
 import os
-from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, Form, Header, Request, UploadFile, status, Response
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import utils.myfaiss
@@ -33,6 +33,8 @@ KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
+KEYFRAMES_MAPPING_PATH = "../preprocess/map-keyframes.json"
+CHUNK_SIZE = 1024 * 1024 // 8
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
@@ -66,6 +68,7 @@ for key, value in json_dict.items():
 thumbnailidx2path = imgidx2path
 
 keyframes_path = json.load(open(KEYFRAMES_JSON))
+keyframes_mapping = json.load(open(KEYFRAMES_MAPPING_PATH))
 
 app.mount("/palette", StaticFiles(directory="static/palette"), name="home")
 app.mount("/concac", StaticFiles(directory="static"), name="static")
@@ -183,20 +186,7 @@ async def root(request: Request):
         request=request, name="credits.html", context={}, data = "con cac"
     )
 
-
-
-@app.get("/test", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="home.html", context={"id": id, "scene_description":"nam mo"}, data = "con cac"
-    )
-
-@app.get("/test_embedding")
-async def test_embedding():
-    vec = utils.embeddingserver.text_feature("I love you baby")
-    return json.dumps(vec, cls=NpEncoder)
-
-@app.get("/test_slide", response_class=HTMLResponse)
+@app.get("/slide", response_class=HTMLResponse)
 async def root(request: Request,
                id: int|None = 12):
     video = utils.get_video_keyframe_path(keyframes_path[id])
@@ -217,3 +207,45 @@ async def root(request: Request,
             "video_keyframes_id": video_keyframes_id
             }, data = "con cac"
     )
+
+
+@app.get("/videotest")
+async def home(request: Request, id: int|None = 12):
+    video = keyframes_mapping[id]['video']
+    timestamp = keyframes_mapping[id]['timestamp']
+    return templates.TemplateResponse(
+        "video.html", context={
+            "request": request, 
+            "title": video, 
+            "timestamp": timestamp,
+            "video_path": DATA_PATH+'/video/'+video}
+    )
+from pathlib import Path
+@app.get("/video_streaming")
+async def video_endpoint(range: str = Header(None), video_path: str|None = 'L01_V001.mp4'):
+    start, end = range.replace("bytes=", "").split("-")
+    # start, end = 0, None
+    print(start,' ',end,' ', video_path)
+    start = int(start)
+    end = int(end) if end else start + CHUNK_SIZE
+    with open(video_path, "rb") as video:
+        video.seek(start)
+        data = video.read(end - start)
+        filesize = str(Path(video_path).stat().st_size)
+        headers = {
+            'Content-Range': f'bytes {str(start)}-{str(end)}/{filesize}',
+            'Accept-Ranges': 'bytes'
+        }
+        return Response(data, status_code=206, headers=headers, media_type="video/mp4")
+
+@app.get("/test", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="home.html", context={"id": id, "scene_description":"nam mo"}, data = "con cac"
+    )
+
+@app.get("/test_embedding")
+async def test_embedding():
+    vec = utils.embeddingserver.text_feature("I love you baby")
+    return json.dumps(vec, cls=NpEncoder)
+
