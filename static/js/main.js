@@ -28,7 +28,7 @@ function createElementFromHTML(htmlString) {
     return div.firstChild;
   }
 
-  function loadData(){
+function loadData(){
     if (data_reponse&&data_reponse.length!=0){
         jsonFile = data_reponse
     } else {
@@ -65,10 +65,11 @@ function createElementFromHTML(htmlString) {
     }
 }
 
-var displayStyle = 'keyframe'
 loadData()
 loadPallete()
-shortcut.add("CTRL+O", function(event) {
+changeDisplayStyle()
+changeDisplayStyle()
+function changeDisplayStyle() {
     if (displayStyle=='keyframe'){
         displayStyle = 'video'
         document.getElementById('imgGridResults').style.display = 'none'
@@ -78,6 +79,9 @@ shortcut.add("CTRL+O", function(event) {
         document.getElementById('imgGridResults').style.display = 'grid'
         document.getElementById('videoGridResults').style.display = 'none'
     }
+}
+shortcut.add("CTRL+D", (event)=>{
+    changeDisplayStyle()
 });
 shortcut.add("CTRL+1", function() {
     select_box = document.getElementById("query-type");
@@ -106,27 +110,21 @@ shortcut.add("F1", function() {
 
 // url/text
 function queryByIdx(idx){
+    addParam("idx_query",idx)
     form = document.getElementById('request')
-    input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "idx_query";
-    input.value = idx;
     form['query_type'].value = 'idx'
-    form.appendChild(input);
     form.submit()
 }
 function queryByIdxDinov2(idx){
+    addParam("idx_query",idx)
     form = document.getElementById('request')
-    input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "idx_query";
-    input.value = idx;
     form['query_type'].value = 'dinov2'
-    form.appendChild(input);
     form.submit()
 }
 
 document.getElementById("request").addEventListener("submit", async function(eventObj) {
+    addParam("last_displayStyle",displayStyle)
+
     form = document.getElementById('request')
     select_box = document.getElementById("query-type");
     if (select_box.value=='image'){
@@ -235,13 +233,9 @@ function bbox_submit(){
         res += `${nx+1}${num2char[ny]}_${bbox.getAttribute('palette_name')} `
         }
     }
+    addParam("od_query",res)
     form = document.getElementById('request')
-    input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "od_query";
-    input.value = res;
     form['query_type'].value = 'od'
-    form.appendChild(input);
     form.submit()
 }
 // window.bbox_submit = bbox_submit
@@ -290,6 +284,14 @@ const isValidUrl = urlString=> {
 
     return url.protocol === "http:" || url.protocol === "https:";
 }
-window.queryByIdxDinov2 = queryByIdxDinov2
+function addParam(key, value){
+    form = document.getElementById('request')
+    input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = value;
+    form.appendChild(input);
+}
 
+window.queryByIdxDinov2 = queryByIdxDinov2
 window.queryByIdx = queryByIdx

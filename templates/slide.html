@@ -246,6 +246,9 @@ button {
   <span class="dot" onclick="currentSlide(2)"></span> 
   <span class="dot" onclick="currentSlide(3)"></span> 
 </div> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
 
 <script src="{{url_for('static', path='/js/shortcut.js')}}"></script>
 <script>
@@ -294,6 +297,8 @@ function init(){
             <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='comboSim.svg')}}" width="40" title="image similarity" onclick="queryByIdx('${video_keyframes_id[i]}'); return false;"></a>
         <a href="#" class="isAdvanced idx_button" title="Visual similarity" style="display: inline-block;">
             <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='imgSim.png')}}" width="40" title="Visual similarity (dinov2)" onclick="queryByIdxDinov2('${video_keyframes_id[i]}'); return false;"></a>
+        <a href="showvideo?id=${video_keyframes_id[i]}" target="_blank" class="isAdvanced idx_button" title="Visual similarity" style="display: inline-block;">
+            <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='open_video.png')}}" width="40" title="Visual similarity (dinov2)"></a>
         </div>
       </div>`
       slideshow.appendChild(createElementFromHTML(el));
@@ -416,10 +421,22 @@ function update_range(){
   }
 }
 
-shortcut.add("CTRL+P", function(event) {
+shortcut.add("CTRL+Q", function(event) {
   url = 'showvideo?id=' + video_keyframes_id[id]
   window.open(url, '_blank').focus();
 });
+shortcut.add("CTRL+S", function(event) {
+  var kframe = video_keyframes_id[id]
+  submit = new XMLHttpRequest();
+  var params = `idx=${kframe}&isKeyframe=true`
+  submit.open("POST", "/submit?" + params, false);
+  submit.send();
+  show_toast();
+});
+
+function show_toast(){
+  toastr.success('Frame saved successfully');
+}
 </script>
 
 

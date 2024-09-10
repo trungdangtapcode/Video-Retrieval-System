@@ -19,7 +19,7 @@ def metric_2_ids(idx1, scores1, idx2, scores2, k):
     for id1, score1 in zip(idx1, scores1):
         for id2, score2 in zip(idx2, scores2):
             if (id1>id2): continue
-            score = score1**2*score2*1/sqrt(id2-id1+25)
+            score = score1**    2*score2*1/sqrt(id2-id1+25)
             res.append((score, id1, id2, score1, score2))
     res.sort(reverse=True)
     assert k <= len(res)

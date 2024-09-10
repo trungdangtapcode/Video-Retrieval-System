@@ -85,6 +85,7 @@ async def home(request: Request, scene_description: str|None = '',
             query_type: str|None = '', idx_query: int|None = -1,
             num_show_query: int = 20, od_query: str|None = '',
             next_scene_description: str|None = '',
+            last_displayStyle: str|None = 'grid',
             model_name: str|None = 'CLIP', string_query: str|None = ''):
     img_idx = None
     global uploaded_img
@@ -139,6 +140,7 @@ async def home(request: Request, scene_description: str|None = '',
                 "string_query": string_query,
                 "num_show_query": num_show_query,
                 "next_scene_description": next_scene_description,
+                "last_displayStyle": last_displayStyle,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
@@ -213,11 +215,13 @@ async def root(request: Request,
 async def home(request: Request, id: int|None = 12):
     video = keyframes_mapping[id]['video']
     timestamp = keyframes_mapping[id]['timestamp']
+    fps = keyframes_mapping[id]['fps']
     return templates.TemplateResponse(
         "video.html", context={
             "request": request, 
             "title": video, 
             "timestamp": timestamp,
+            "fps": fps,
             "video_path": DATA_PATH+'/video/'+video}
     )
 from pathlib import Path
@@ -225,7 +229,7 @@ from pathlib import Path
 async def video_endpoint(range: str = Header(None), video_path: str|None = 'L01_V001.mp4'):
     start, end = range.replace("bytes=", "").split("-")
     # start, end = 0, None
-    print(start,' ',end,' ', video_path)
+    # print(start,' ',end,' ', video_path)
     start = int(start)
     end = int(end) if end else start + CHUNK_SIZE
     with open(video_path, "rb") as video:
@@ -237,6 +241,19 @@ async def video_endpoint(range: str = Header(None), video_path: str|None = 'L01_
             'Accept-Ranges': 'bytes'
         }
         return Response(data, status_code=206, headers=headers, media_type="video/mp4")
+
+@app.post("/submit")
+async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None = None):
+    with open('static/reponse/submit.txt', "r+") as f:
+        f.read()
+        if (isKeyframe):
+            idx = keyframes_mapping[idx]['frame']
+            video = keyframes_mapping[idx]['video']
+        else:
+            assert(video != None)
+        data = video[:-4] +',' + str(idx)+'\n'
+        f.write(data)
+    return 'submit ok'
 
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):

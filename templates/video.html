@@ -7,6 +7,11 @@
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
     <script src="https://vjs.zencdn.net/8.6.1/video.min.js" defer></script>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
     <style>
         body {
             background-color: #151515;
@@ -64,6 +69,7 @@
     </div>
 
 </body>
+<script src="{{url_for('static', path='/js/shortcut.js')}}"></script>
 <script>
     var timestamp = parseFloat('{{timestamp}}');
     var video = document.getElementById('video-player');
@@ -86,5 +92,23 @@
             }
         }
     })
+    var fps = parseFloat('{{fps}}');
+    shortcut.add("Ctrl+S", function() {
+        frame = Math.floor(video.currentTime * fps)
+        submit = new XMLHttpRequest();
+        title = '{{title}}'
+        var params = `idx=${frame}&isKeyframe=false&video=${title}`
+        submit.open("POST", "/submit?" + params, false);
+        // var params = JSON.stringify({
+        //     "frame": frame,
+        //     "isKeyframe": true
+        // });
+        // submit.send(params)
+        submit.send()
+        show_toast()
+    });
+    function show_toast(){
+        toastr.success('Frame saved successfully');
+    }
 </script>
 </html>
