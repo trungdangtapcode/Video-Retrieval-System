@@ -23,7 +23,7 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.0.103/"
+EMBEDDING_SERVER = "http://26.48.117.115/"
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
 BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"
@@ -100,7 +100,16 @@ async def home(request: Request, scene_description: str|None = '',
         scores = list(range(len(img_idx),0,-1))
     if (query_type=='od' and od_query != ''):
         img_idx, scores = utils.co_detr.get_top_k(od_query, num_clip_query)    
-    
+    if (query_type=='texttext' and 
+        scene_description != None and scene_description != '' and
+        next_scene_description != None and next_scene_description != ''):
+        # k = min(num_clip_query, 1000)
+        k1 = 800
+        k2 = 500
+        assert k1*k2 >= num_show_query
+        img_idx1, scores1 = db.text_search(scene_description, k1, model_name)
+        img_idx2, scores2 = db.text_search(next_scene_description, k2, model_name)
+        img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, num_clip_query)
     data = []
     if (not img_idx is None):
         for idx, score in zip(img_idx,scores):
@@ -126,6 +135,7 @@ async def home(request: Request, scene_description: str|None = '',
                 "model_name": model_name,
                 "string_query": string_query,
                 "num_show_query": num_show_query,
+                "next_scene_description": next_scene_description,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
@@ -197,7 +207,7 @@ async def root(request: Request,
     for idx, frame in enumerate((os.listdir(KEYFRAMES_PATH+'/'+video))):
         video_keyframes_path.append('data/keyframes/'+video+'/'+frame)
         video_resized_keyframes_path.append('data/keyframes_resized/'+video+'/'+frame)
-        video_keyframes_id.append(current_index-current_index+idx)
+        video_keyframes_id.append(id-current_index+idx)
         
     return templates.TemplateResponse(
         request=request, name="slide.html", context={

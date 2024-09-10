@@ -51,6 +51,7 @@
               <option value="dinov2" hidden>dinov2</option>
               <option value="ocr">OCR</option>
               <option value="od" hidden>OD</option>
+              <option value="texttext">Text->Text</option>
             </select>
           </div>
         </div>
@@ -157,7 +158,7 @@
     </form>
   </main>
   <div id="popupOverlay" 
-  class="overlay-container">
+  class="overlay-container" onclick="closePopup()">
     <div class="popup-box"
     style="width: 90%; height: 90%;">
       <iframe src="test_slide?id=10"
@@ -165,7 +166,7 @@
       style="width: 100%; height: 100%;"></iframe>      
       <button class="btn-close-popup" 
       onclick="closePopup()">
-      Close
+      X
       </button>
     </div>
   </div>

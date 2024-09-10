@@ -14,6 +14,9 @@ body {font-family: Verdana, sans-serif; margin:0}
     margin: auto;
     position:relative;
 }
+ .thumbnail_parrent_button {
+    
+} 
 
 img {vertical-align: middle;}
 
@@ -188,6 +191,13 @@ button {
     cursor: pointer;
 }
 
+.idx_button {
+  opacity: 0.5;
+  transition: opacity .2s ease-out;
+}
+.idx_button:hover {
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -247,6 +257,8 @@ const slides_len = 11;
 const middle = Math.floor((slides_len+1)/2)
 const range = middle-1
 const isPopup = window.parent.closePopup!=undefined
+queryByIdxDinov2 = window.parent.queryByIdxDinov2
+queryByIdx = window.parent.queryByIdx
 init()
 var id = parseInt('{{id}}')
 var l, r
@@ -260,6 +272,7 @@ function createElementFromHTML(htmlString) {
   return div.firstChild;
 }
 function init(){
+    console.log(queryByIdx)
     let slideshow = document.querySelector('#slideshow-abstract-container');
     let gallery = document.querySelector('.gallery');
     slideshow.innerHTML = ''
@@ -274,7 +287,12 @@ function init(){
       el = `<div class="mySlides fade">
         <img src="" style="width:100%">
         <div class="numbertext">${i+1} / ${num_keyframes}</div>
-        <div class="text">Con cac ba may</div>
+        <div class="text">
+          <a href="#" class="isSimplified idx_button" title="image similarity" style="display: inline-block;">
+            <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='comboSim.svg')}}" width="40" title="image similarity" onclick="queryByIdx('${video_keyframes_id[i]}'); return false;"></a>
+        <a href="#" class="isAdvanced idx_button" title="Visual similarity" style="display: inline-block;">
+            <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='imgSim.png')}}" width="40" title="Visual similarity (dinov2)" onclick="queryByIdxDinov2('${video_keyframes_id[i]}'); return false;"></a>
+        </div>
       </div>`
       slideshow.appendChild(createElementFromHTML(el));
     }

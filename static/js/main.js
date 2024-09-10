@@ -95,6 +95,10 @@ shortcut.add("CTRL+4", function() {
     select_box = document.getElementById("query-type");
     select_box.options[5].selected = true;
 });
+shortcut.add("CTRL+5", function() {
+    select_box = document.getElementById("query-type");
+    select_box.options[7].selected = true;
+});
 
 shortcut.add("F1", function() {
     alert("F1 pressed");
@@ -286,3 +290,6 @@ const isValidUrl = urlString=> {
 
     return url.protocol === "http:" || url.protocol === "https:";
 }
+window.queryByIdxDinov2 = queryByIdxDinov2
+
+window.queryByIdx = queryByIdx
