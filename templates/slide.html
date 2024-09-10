@@ -247,6 +247,7 @@ button {
   <span class="dot" onclick="currentSlide(3)"></span> 
 </div> -->
 
+<script src="{{url_for('static', path='/js/shortcut.js')}}"></script>
 <script>
 const preload = 10
 const video_keyframes_path = JSON.parse("{{video_keyframes_path}}".replaceAll(/&#39;/g,'"'))
@@ -367,7 +368,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 function update_range(){
-  console.log(id)
+  // console.log(id)
   l = Math.max(0, id - preload)
   r = Math.min(num_keyframes-1, id + preload)
   // console.log(l, r)
@@ -414,7 +415,13 @@ function update_range(){
     }
   }
 }
+
+shortcut.add("CTRL+P", function(event) {
+  url = 'showvideo?id=' + video_keyframes_id[id]
+  window.open(url, '_blank').focus();
+});
 </script>
+
 
 </body>
 </html> 

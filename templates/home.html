@@ -194,6 +194,7 @@
     popup_iframe = document.getElementById("popup-iframe")
     popup_iframe.src = "slide?id=" + idx
     document.getElementById("popupOverlay").classList.add("show")
+    popup_iframe.contentWindow.focus()
   }
   window.closePopup = closePopup
 </script>

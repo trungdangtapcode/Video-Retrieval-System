@@ -209,7 +209,7 @@ async def root(request: Request,
     )
 
 
-@app.get("/videotest")
+@app.get("/showvideo")
 async def home(request: Request, id: int|None = 12):
     video = keyframes_mapping[id]['video']
     timestamp = keyframes_mapping[id]['timestamp']

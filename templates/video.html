@@ -57,6 +57,7 @@
                }
              }
            }' 
+           autoplay="autoplay"
            >
             <source id="video-source" type="video/mp4" src="/video_streaming?video_path={{video_path}}" />
         </video>
@@ -67,13 +68,22 @@
     var timestamp = parseFloat('{{timestamp}}');
     var video = document.getElementById('video-player');
     video.currentTime = timestamp
-    video.play()
+    // setTimeout(() => {
+    //     video.play()
+    // }, 0);
     document.addEventListener('keydown', (even)=>{
         if(even.key == 'ArrowRight'){
             video.currentTime += 5
         }
         if(even.key == 'ArrowLeft'){
             video.currentTime -= 5
+        }
+        if (even.key == ' '){
+            if(video.paused){
+                video.play()
+            }else{
+                video.pause()
+            }
         }
     })
 </script>
