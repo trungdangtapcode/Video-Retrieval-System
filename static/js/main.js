@@ -39,7 +39,13 @@ function loadData(){
     video_grid = document.getElementById('videoGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         if (keyframe_to_video[frame_data['video']]==undefined){
-            el = createElementFromHTML(`<div id="imgGridResults" class="gridcontainer"></div>`)
+            el = createElementFromHTML(`
+                <div id="imgGridResults" class="gridcontainer">
+                    <h2 style='
+                    width:100%; text-align:center; 
+                    align-self:center; font-size: 2em;'>
+                    ${frame_data['video']}</h2>
+                </div>`)
             keyframe_to_video[frame_data['video']] = el
             video_grid.appendChild(el)
             video_grid.appendChild(createElementFromHTML(`<div class="hline"></div>)`))
@@ -85,23 +91,23 @@ shortcut.add("CTRL+D", (event)=>{
 });
 shortcut.add("CTRL+1", function() {
     select_box = document.getElementById("query-type");
-    select_box.options[0].selected = true;
+    changeSelected(select_box,'text')
 });
 shortcut.add("CTRL+2", function() {
     select_box = document.getElementById("query-type");
-    select_box.options[1].selected = true;
+    changeSelected(select_box,'url')
 });
 shortcut.add("CTRL+3", function() {
     select_box = document.getElementById("query-type");
-    select_box.options[2].selected = true;
+    changeSelected(select_box,'image')
 });
 shortcut.add("CTRL+4", function() {
     select_box = document.getElementById("query-type");
-    select_box.options[5].selected = true;
+    changeSelected(select_box,'ocr')
 });
 shortcut.add("CTRL+5", function() {
     select_box = document.getElementById("query-type");
-    select_box.options[7].selected = true;
+    changeSelected(select_box,'texttext')
 });
 document.addEventListener('keydown',(event)=>{
     if (event.key=='Escape'){
@@ -261,6 +267,28 @@ function loadPallete(){
     window.defaultPaletteBox = document.getElementsByClassName("dragbox")[2]
 }
 
+shortcut.add("CTRL+E", function() {
+    let boxes = document.getElementsByTagName('textarea')
+    for (let box of boxes){
+        value = box.value
+        value = value.replaceAll('\\','')
+        value = value.replaceAll('/','')
+        value = value.replaceAll('"','')
+        value = value.replaceAll("'",'')
+        if (value=='') continue
+        value = translate(value)
+        value = value.replaceAll('"','')
+        value = value.replaceAll("'",'')
+        box.value = value
+    }
+});
+function translate(text){
+    var request = new XMLHttpRequest();
+    var params = `text=${text}&dest=en&src=vi`
+    request.open("GET", "translate?"+params, false);
+    request.send(null)
+    return request.responseText
+}
 
 document.getElementById("num-show-query").addEventListener("change", function() { 
     show = document.getElementById("num-show-query")

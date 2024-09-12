@@ -19,62 +19,18 @@
 
 <body style="background-image: url('https://i.sstatic.net/kx8MT.gif'); background-size: cover;">
   <header>
-    <a href="credits"><h1
+    <a href="credits"><h1 style="display: none; float:right"
     class="rainbow_text_animated"><b>DMCS©</b></h1>
     </a>
   </header>
   <main>
     <form id="request">
-      <div class="my_headerGrid">
-        <div class="search-container">
-          <input type="text" name="scene_description" class="large-placeholder"
-            placeholder="Describe the scene you are looking for..." value="{{scene_description}}" />
-          <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
-            value={{num_clip_query}} size="50" style="width: 50px; padding: 10px; 
-              height: 100%; font-size: 20px;" id="num-clip-query" />
-          <input type="number" name="num_show_query" class="large-placeholder" placeholder="Number of show on Web"
-          value={{num_show_query}} size="50" style="width: 50px; padding: 10px; 
-            height: 100%; font-size: 20px; display: none;" id="num-show-query"/>
-          <div class="select">
-            <select id="model-name" name="model_name">
-              <option value="CLIP" selected="selected">CLIP</option>
-              <option value="ALIGN">ALIGN</option>
-            </select>
-          </div>
-          <div class="select">
-            <select id="query-type" name="query_type"
-              style="font-size: 18px">
-              <option value="text" selected="selected">Text query</option>
-              <option value="url">URL query</option>
-              <option value="image">Image query</option>
-              <option value="idx" hidden>idx</option>
-              <option value="dinov2" hidden>dinov2</option>
-              <option value="ocr">OCR</option>
-              <option value="od" hidden>OD</option>
-              <option value="texttext">Text->Text</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="my_headerGrid">
-        <div class="search-container">
-          <input type="text" name="next_scene_description" class="large-placeholder"
-            placeholder="Describe next scene you are looking for..." value="{{next_scene_description}}" />
-          <input type="text" name="string_query" class="large-placeholder"
-            placeholder="OCR/ASR.. (string query)" value="{{string_query}}" />
-          <div class="select" style="display: none;">
-            <select id="ranking-type" name="ranking_type">
-              <option value="ocr">OCR</option>
-              <option value="asr">ASR</option>
-              <option value="ocr_asr" selected="selected">ASR+OCR</option>
-              <option value="od" hidden>OD</option>
-            </select>
-          </div>
-          </div>
-        </div>
-      </div>
       <div class="bodyGrid">
         <div class="sidebarGrid" id="searchSidebar" style="width: 310px; height:100%;">
+          <a href="credits"><h1 style=" float:left"
+            class="rainbow_text_animated"><b>DMCS©</b></h1>
+          </a>
+
           <div class="advanced" style="display: block">
             <div id="whiteboard" ondrop="dropPalette(event)" ondragover="allowDrop(event)"></div>
             <br>
@@ -91,7 +47,6 @@
               </div>
             </div>
             <div class="bbox-submit-button" onclick="bbox_submit()">Click Me</div>
-    
             <div class="headerItem">
               <div id="qbe" class="font-normal">
                 <div id="filter" class="advanced" style="display: block">
@@ -133,6 +88,56 @@
         </div>
         <div class="contentGrid" id="content"
         style="height: 100%;">
+
+        <div class="my_headerGrid">
+          <div class="search-container" style="height: 150px;">
+            <textarea type="text" name="scene_description" class="large-placeholder"
+              placeholder="Describe the scene you are looking for..." value="{{scene_description}}"
+              style="width: 40%;"></textarea>
+            <textarea type="text" name="next_scene_description" class="large-placeholder"
+              placeholder="Describe next scene you are looking for..." value="{{next_scene_description}}"
+              style="width: 40%;"></textarea>
+            <input type="number" name="num_show_query" class="large-placeholder" placeholder="Number of show on Web"
+              value={{num_show_query}} size="50" style="width: 50px;
+              font-size: 20px; display: none;" id="num-show-query"/>
+          </div>
+        </div>
+        <div class="my_headerGrid">
+          <div class="search-container">
+            <input type="text" name="string_query" class="large-placeholder"
+              placeholder="OCR/ASR.. (string query)" value="{{string_query}}" />
+            <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
+              value={{num_clip_query}} size="50" style="width: 50px;" id="num-clip-query" />
+            <div class="select">
+              <select id="model-name" name="model_name">
+                <option value="CLIP" selected="selected">CLIP</option>
+                <option value="ALIGN">ALIGN</option>
+              </select>
+            </div>
+            <div class="select">
+              <select id="query-type" name="query_type"
+                style="font-size: 18px">
+                <option value="text" selected="selected">Text query</option>
+                <option value="url">URL query</option>
+                <option value="image">Image query</option>
+                <option value="idx" hidden>idx</option>
+                <option value="dinov2" hidden>dinov2</option>
+                <option value="ocr">OCR</option>
+                <option value="od" hidden>OD</option>
+                <option value="texttext">Text->Text</option>
+              </select>
+            </div>
+            <div class="select" style="display: none;">
+              <select id="ranking-type" name="ranking_type">
+                <option value="ocr">OCR</option>
+                <option value="asr">ASR</option>
+                <option value="ocr_asr" selected="selected">ASR+OCR</option>
+                <option value="od" hidden>OD</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
           <div id="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
           </div>
@@ -175,18 +180,8 @@
   //{&#34;} is {'} but JSON.parse only accept {"}
   data_reponse =  "{{data_response}}".replaceAll(/&#34;/g,'"')
   data_reponse = JSON.parse(data_reponse)
-  select_box = document.getElementById("query-type");
-  for (let item of select_box.options){
-    if (item.value == "{{query_type}}"){
-      item.selected = true;
-    }
-  }
-  select_box = document.getElementById("model-name");
-  for (let item of select_box.options){
-    if (item.value == "{{model_name}}"){
-      item.selected = true;
-    }
-  }
+  changeSelected(document.getElementById("query-type"),"{{query_type}}")
+  changeSelected(document.getElementById("model-name"),"{{model_name}}")
   function closePopup(){
     document.getElementById("popupOverlay").classList.remove("show")
   }
@@ -198,6 +193,13 @@
   }
   window.closePopup = closePopup
 
+  function changeSelected(select_box, value){
+    for (let item of select_box.options){
+      if (item.value == value){
+        item.selected = true;
+      }
+    }
+  }
   var displayStyle = '{{last_displayStyle}}'
 </script>
 <script src="{{url_for('static', path='/js/shortcut.js')}}"></script>

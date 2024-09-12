@@ -9,6 +9,14 @@ human_face.png (humanface.png)
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
 
+
+============================================
+<input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
+              value={{num_clip_query}} size="50" style="width: 50px; padding: 10px; 
+                height: 100%; font-size: 20px;" id="num-clip-query" />
+<input type="number" name="num_show_query" class="large-placeholder" placeholder="Number of show on Web"
+            value={{num_show_query}} size="50" style="width: 50px; /*padding: 10px;
+              height: 80%;*/ font-size: 20px; display: none;" id="num-show-query"/>
 ===========================================
 VIDEO_FILE = DATA_PATH+'/video/L01_V001.mp4'
 def generate_video_chunks():

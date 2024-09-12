@@ -7,6 +7,7 @@ import utils.myfaiss
 import utils.embeddingserver
 import utils.ocr
 import utils.co_detr
+import utils.translate
 import json
 import numpy as np
 import validators
@@ -34,7 +35,7 @@ RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
 KEYFRAMES_MAPPING_PATH = "../preprocess/map-keyframes.json"
-CHUNK_SIZE = 1024 * 1024 // 8
+CHUNK_SIZE = 1024 * 1024 // 1
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
@@ -155,7 +156,8 @@ async def thumbnail_template(request: Request, img_idx: int):
     return templates.TemplateResponse(
         request=request, name="thumbnail_box.html", 
             context={"thumbnail_path": path, 
-                    "img_idx":img_idx, 
+                    "img_idx":img_idx,
+                    "title": str(keyframes_mapping[img_idx]['frame']),
                     "video": utils.get_video_keyframe_path(keyframes_path[img_idx]), 
                     "keyframe_path": 'keyframes/'+keyframes_path[img_idx]}
                     , data = "con cac"
@@ -229,9 +231,14 @@ from pathlib import Path
 async def video_endpoint(range: str = Header(None), video_path: str|None = 'L01_V001.mp4'):
     start, end = range.replace("bytes=", "").split("-")
     # start, end = 0, None
-    # print(start,' ',end,' ', video_path)
+    print('streaming ',start,'..',end,' ', video_path)
     start = int(start)
+    # start = max(start-CHUNK_SIZE//16, 0)
     end = int(end) if end else start + CHUNK_SIZE
+    
+    #THIS IS FUCKING IMPORTANT (A network error caused the media download to fail part-way.)
+    end = min(end, Path(video_path).stat().st_size)
+    
     with open(video_path, "rb") as video:
         video.seek(start)
         data = video.read(end - start)
@@ -247,13 +254,18 @@ async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None =
     with open('static/reponse/submit.txt', "r+") as f:
         f.read()
         if (isKeyframe):
-            idx = keyframes_mapping[idx]['frame']
             video = keyframes_mapping[idx]['video']
+            idx = keyframes_mapping[idx]['frame']
         else:
             assert(video != None)
         data = video[:-4] +',' + str(idx)+'\n'
         f.write(data)
     return 'submit ok'
+
+@app.get("/translate")
+async def translate(request: Request, text: str, dest: str = 'en', src = 'vi'):
+    return utils.translate.translate(text, dest, src)
+
 
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):

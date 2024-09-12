@@ -5,13 +5,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>{{title}}</title>
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/8.6.1/video.min.js" defer></script>
-
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <link href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
+    
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/8.6.1/video.min.js" defer></script>
+
+    <link rel="icon" type="image/x-icon" href="{{url_for('static',path='img/favicon_video.png')}}">
     <style>
         body {
             background-color: #151515;
@@ -20,6 +22,9 @@
         }
 
         h1 {
+            text-align: center;
+        }
+        h3 {
             text-align: center;
         }
     </style>
@@ -50,18 +55,20 @@
 
 <body>
     <br><br>
-    <h1>{{title}}</h1>
+    <a href="#" id = "video-title"><h1>{{title}}</h1></a>
+    <h3 id = 'currenttimeshow'></h3>
     <div id="video-container">
         <video id="video-player" class="video-js" preload="none" controls muted="muted"
-            style="position: relative; margin-left: auto; margin-right: auto; display: block" poster="" data-setup='{
-             "playbackRates": [1, 1.25, 1.5, 2, 5],
-             "controlBar": {
-               "skipButtons": {
-                 "backward": 2,
-                 "forward": 2
-               }
-             }
-           }' 
+            style="position: relative; margin-left: auto; margin-right: auto; display: block" poster="" 
+            data-setup='{
+                "playbackRates": [1, 1.25, 1.5, 2, 5],
+                "controlBar": {
+                    "skipButtons": {
+                        "backward": 5,
+                        "forward": 5
+                    }
+                }
+            }' 
            autoplay="autoplay"
            >
             <source id="video-source" type="video/mp4" src="/video_streaming?video_path={{video_path}}" />
@@ -73,10 +80,23 @@
 <script>
     var timestamp = parseFloat('{{timestamp}}');
     var video = document.getElementById('video-player');
-    video.currentTime = timestamp
+    video.addEventListener('loadedmetadata', function() {
+        video.currentTime = timestamp;
+    });
+    video.defaultPlaybackRate = "1.5"
     // setTimeout(() => {
     //     video.play()
     // }, 0);
+    currenttimeshow = document.getElementById('currenttimeshow')
+    // video.addEventListener("timeupdate", (event) => {
+    // });
+    function showtime(){
+        x = video.currentTime
+        m = Math.floor(x/60)
+        s = Math.floor(x%60)
+        f = Math.floor(video.currentTime * fps)
+        currenttimeshow.innerHTML = `${m}:${("0"+s).slice(-2)}(${x.toFixed(2)}) - ${f}`
+    }
     document.addEventListener('keydown', (even)=>{
         if(even.key == 'ArrowRight'){
             video.currentTime += 2
@@ -105,10 +125,27 @@
         // });
         // submit.send(params)
         submit.send()
-        show_toast()
+        toastr.success(`${frame} saved successfully`);
     });
     function show_toast(){
-        toastr.success('Frame saved successfully');
     }
+    setInterval(showtime, 1000/fps)
+    const speeds =  [1, 1.25, 1.5, 2, 5]
+    document.addEventListener("keydown", (event) => {
+        idx = speeds.indexOf(video.playbackRate)
+        if (event.key === "-") {
+            idx -= 1
+            if (idx < 0){
+                idx = 0
+            }
+        } else if (event.key === "=") {
+            idx += 1
+            if (idx >= speeds.length){
+                idx = speeds.length - 1
+            }
+        }
+        video.playbackRate = speeds[idx]
+    });
+    document.getElementById('video-title').href = `data/video/{{title}}`
 </script>
 </html>

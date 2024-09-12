@@ -6,9 +6,13 @@ conda install -c pytorch faiss-gpu -n "YOURENV"
 
 pip install validators
 pip install requests
-pip install rank_bm25
 pip install tqdm
-!pip install retriv
+//pip install rank_bm25
+pip install Whoosh
+pip install bm25s[full]
+pip install PyStemmer
+pip install jax[cpu]
+//pip install retriv
 
 conda install pytorch-cuda=12.1 -c pytorch -c nvidia -y
 conda install pytorch torchvision torchaudio -c pytorch -c nvidia -y
