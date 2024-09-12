@@ -75,6 +75,36 @@ loadData()
 loadPallete()
 changeDisplayStyle()
 changeDisplayStyle()
+for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
+    box = document.getElementsByTagName('textarea')[i]
+    box.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            form = document.getElementById('request')
+            if (form['query_type'].value != 'text' && form['query_type'].value != 'texttext'){
+                form['query_type'].value = 'text    '
+            }
+            form.submit();
+        }
+    })
+}
+document.getElementById('ocr-box').addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        form = document.getElementById('request')
+        form['query_type'].value = 'ocr'
+        form.submit();
+    }
+})  
+document.getElementById('url-textbox').addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        form = document.getElementById('request')
+        form['query_type'].value = 'url'
+        form.submit();
+    }
+}) 
+
 function changeDisplayStyle() {
     if (displayStyle=='keyframe'){
         displayStyle = 'video'
@@ -282,6 +312,23 @@ shortcut.add("CTRL+E", function() {
         box.value = value
     }
 });
+shortcut.add("ALT+Q", function() {
+    let boxes = document.getElementsByTagName('textarea')
+    boxes[0].focus()
+});
+shortcut.add("ALT+W", function() {
+    let boxes = document.getElementsByTagName('textarea')
+    boxes[1].focus()
+});
+shortcut.add("ALT+A", function() {
+    let box = document.getElementById('ocr-box')
+    box.focus()
+});
+shortcut.add("ALT+S", function() {
+    let box = document.getElementById('num-clip-query')
+    box.focus()
+});
+
 function translate(text){
     var request = new XMLHttpRequest();
     var params = `text=${text}&dest=en&src=vi`

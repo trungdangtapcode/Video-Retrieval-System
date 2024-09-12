@@ -93,10 +93,10 @@
           <div class="search-container" style="height: 150px;">
             <textarea type="text" name="scene_description" class="large-placeholder"
               placeholder="Describe the scene you are looking for..." value="{{scene_description}}"
-              style="width: 40%;"></textarea>
+              style="width: 40%;">{{scene_description}}</textarea>
             <textarea type="text" name="next_scene_description" class="large-placeholder"
               placeholder="Describe next scene you are looking for..." value="{{next_scene_description}}"
-              style="width: 40%;"></textarea>
+              style="width: 40%;">{{next_scene_description}}</textarea>
             <input type="number" name="num_show_query" class="large-placeholder" placeholder="Number of show on Web"
               value={{num_show_query}} size="50" style="width: 50px;
               font-size: 20px; display: none;" id="num-show-query"/>
@@ -105,7 +105,7 @@
         <div class="my_headerGrid">
           <div class="search-container">
             <input type="text" name="string_query" class="large-placeholder"
-              placeholder="OCR/ASR.. (string query)" value="{{string_query}}" />
+              placeholder="OCR/ASR.. (string query)" value="{{string_query}}" id="ocr-box"/>
             <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
               value={{num_clip_query}} size="50" style="width: 50px;" id="num-clip-query" />
             <div class="select">

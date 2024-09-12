@@ -35,7 +35,7 @@ RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
 KEYFRAMES_MAPPING_PATH = "../preprocess/map-keyframes.json"
-CHUNK_SIZE = 1024 * 1024 // 1
+CHUNK_SIZE = 1024 * 1024
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
@@ -231,21 +231,23 @@ from pathlib import Path
 async def video_endpoint(range: str = Header(None), video_path: str|None = 'L01_V001.mp4'):
     start, end = range.replace("bytes=", "").split("-")
     # start, end = 0, None
-    print('streaming ',start,'..',end,' ', video_path)
     start = int(start)
     # start = max(start-CHUNK_SIZE//16, 0)
     end = int(end) if end else start + CHUNK_SIZE
-    
+
     #THIS IS FUCKING IMPORTANT (A network error caused the media download to fail part-way.)
-    end = min(end, Path(video_path).stat().st_size)
-    
+    end = min(end, Path(video_path).stat().st_size-1)
+    print('streaming ',start,'..',end,' ', video_path)
+
     with open(video_path, "rb") as video:
         video.seek(start)
-        data = video.read(end - start)
+        data = video.read(end - start+1)
+        assert Path(video_path).stat().st_size, os.path.getsize(video_path)
         filesize = str(Path(video_path).stat().st_size)
         headers = {
             'Content-Range': f'bytes {str(start)}-{str(end)}/{filesize}',
-            'Accept-Ranges': 'bytes'
+            'Accept-Ranges': 'bytes',
+            'Content-Length': str(end - start+1)  # Specify correct content length
         }
         return Response(data, status_code=206, headers=headers, media_type="video/mp4")
 
