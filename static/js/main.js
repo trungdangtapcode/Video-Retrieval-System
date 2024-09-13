@@ -82,7 +82,7 @@ for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
             e.preventDefault();
             form = document.getElementById('request')
             if (form['query_type'].value != 'text' && form['query_type'].value != 'texttext'){
-                form['query_type'].value = 'text    '
+                form['query_type'].value = 'text'
             }
             form.submit();
         }

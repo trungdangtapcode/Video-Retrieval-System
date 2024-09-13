@@ -114,7 +114,8 @@ async def home(request: Request, scene_description: str|None = '',
         assert k1*k2 >= num_show_query
         img_idx1, scores1 = db.text_search(scene_description, k1, model_name)
         img_idx2, scores2 = db.text_search(next_scene_description, k2, model_name)
-        img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, num_clip_query)
+        img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, 
+                            num_clip_query, keyframes_mapping)
     data = []
     if (not img_idx is None):
         for idx, score in zip(img_idx,scores):
@@ -268,6 +269,18 @@ async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None =
 async def translate(request: Request, text: str, dest: str = 'en', src = 'vi'):
     return utils.translate.translate(text, dest, src)
 
+@app.post("/get_file_local")
+async def get_file_local(request: Request, file: UploadFile = File(...)):
+    path = '../file_local'
+    try:
+        contents = file.file.read()
+        with open(path+'/'+file.filename, 'wb') as f:
+            f.write(contents)
+    except Exception:
+        return {"message": "There was an error uploading the file"}
+    finally:
+        file.file.close()
+    return "ok"
 
 @app.get("/test", response_class=HTMLResponse)
 async def root(request: Request):
