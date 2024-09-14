@@ -12,6 +12,7 @@ pip install Whoosh
 pip install bm25s[full]
 pip install PyStemmer
 pip install jax[cpu]
+pip install googletrans==3.1.0a0
 //pip install retriv
 
 conda install pytorch-cuda=12.1 -c pytorch -c nvidia -y

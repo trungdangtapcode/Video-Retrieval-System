@@ -1,4 +1,4 @@
-<div data-videoid="14625" id="res_14625-157" data-row="3" data-col="0" class="item column-span-1">
+<div data-videoid="14625" id="res_14625-157" data-row="3" data-col="0" class="item column-span-1 {{newold}}">
     <a></a>
     <div class="result-border" style="border-color: #71b1f4;">
         <a><div class="myimg-thumbnail" id="14625-157" lang="14625|videos/tiny/14625-tiny.mp4">
@@ -13,8 +13,8 @@
             <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='comboSim.svg')}}" width="20" title="image similarity" alt="14625-157" id="comboSim14625-157" onclick="queryByIdx('{{img_idx}}'); return false;"></a>
         <a href="#" class="isAdvanced" title="Visual similarity" style="display: inline-block;">
             <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='imgSim.png')}}" width="20" title="Visual similarity (dinov2)" alt="14625-157" id="gemSim14625-157" onclick="queryByIdxDinov2('{{img_idx}}'); return false;"></a>
-        <a href="#!" class="isAdvanced" title="Visual similarity" style="display: inline-block;">
-            <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='open_keyframe.png')}}" width="20" title="Open keyframe" alt="14625-157" id="gemSim14625-157" onclick="openPopup('{{img_idx}}', event)"></a>
+        <a href="javascript:void(0);" class="isAdvanced" title="Visual similarity" style="display: inline-block;">
+            <img loading="eager" style="padding: 2px;" src="{{url_for('img', path='open_keyframe.png')}}" width="20" title="Open keyframe" alt="14625-157" id="gemSim14625-157" onclick="openPopup('{{img_idx}}')" onauxclick="openPopup('{{img_idx}}',true)"></a>
         <a href="#" class="isAdvanced" title="semantic similarity" style="display: hidden;"><img loading="eager" style="padding: 2px;" src="{{url_for('img', path='aladinSim.svg')}}" width="20" title="semantic similarity" alt="14625-157" id="aladinSim14625-157" onclick="var queryObj=new Object(); queryObj.aladinSim='14625-157'; searchByLink(queryObj); return false;"></a>
         <a href="#" class="isAdvanced" title="semantic video  similarity" style="display: hidden;"><img loading="eager" style="padding: 2px;" src="{{url_for('img', path='clipSim.svg')}}" width="20" title="semantic video  similarity" alt="14625-157" id="clipSim14625-157" onclick="var queryObj=new Object(); queryObj.clipSim='14625-157'; searchByLink(queryObj); return false;"></a>
 

@@ -25,19 +25,21 @@ def check_valid_url(url):
 
 
 EMBEDDING_SERVER = "http://26.48.117.115/"
+EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
-BIN_CLIP_PATH = "../preprocess/normalizedCLIP.index"
-BIN_DINOV2_PATH = "../preprocess/dinov2_index.bin"
-KEYFRAMES_JSON = "keyframes_path.json"
+BIN_CLIP_PATH = "../preprocess/clip1_new.index"
+BIN_DINOV2_PATH = "../preprocess/dino1_new.index"
+KEYFRAMES_JSON = "../preprocess/keyframespath1_new.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
-KEYFRAMES_MAPPING_PATH = "../preprocess/map-keyframes.json"
+KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes1_new.json"
 CHUNK_SIZE = 1024 * 1024
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
+utils.embeddingserver.EMBEDDING_SERVER_INTERNVIDEO = EMBEDDING_SERVER_INTERNVIDEO
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
 utils.ocr.init()
 utils.co_detr.DIRECTORY_INDEX = CODETR_DIRECTORY
@@ -87,6 +89,7 @@ async def home(request: Request, scene_description: str|None = '',
             num_show_query: int = 20, od_query: str|None = '',
             next_scene_description: str|None = '',
             last_displayStyle: str|None = 'grid',
+            last_newold: str|None = 'newold',
             model_name: str|None = 'CLIP', string_query: str|None = ''):
     img_idx = None
     global uploaded_img
@@ -143,6 +146,7 @@ async def home(request: Request, scene_description: str|None = '',
                 "num_show_query": num_show_query,
                 "next_scene_description": next_scene_description,
                 "last_displayStyle": last_displayStyle,
+                "last_newold": last_newold,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
@@ -159,8 +163,9 @@ async def thumbnail_template(request: Request, img_idx: int):
             context={"thumbnail_path": path, 
                     "img_idx":img_idx,
                     "title": str(keyframes_mapping[img_idx]['frame']),
-                    "video": utils.get_video_keyframe_path(keyframes_path[img_idx]), 
-                    "keyframe_path": 'keyframes/'+keyframes_path[img_idx]}
+                    "video": utils.get_video_keyframe_path(keyframes_path[img_idx]),
+                    "keyframe_path": 'keyframes/'+keyframes_path[img_idx],
+                    "newold": utils.get_newold_from_path(keyframes_path[img_idx])}
                     , data = "con cac"
     )
 
@@ -199,7 +204,11 @@ async def root(request: Request,
     video_keyframes_path = []
     video_resized_keyframes_path = []
     video_keyframes_id = []
-    for idx, frame in enumerate((os.listdir(KEYFRAMES_PATH+'/'+video))):
+    ##>500 => window not sort
+    sorted_frames = sorted(
+        os.listdir(KEYFRAMES_PATH+'/'+video), 
+        key = lambda x: int(x.split('.')[0]))
+    for idx, frame in enumerate(sorted_frames):
         video_keyframes_path.append('data/keyframes/'+video+'/'+frame)
         video_resized_keyframes_path.append('data/keyframes_resized/'+video+'/'+frame)
         video_keyframes_id.append(id-current_index+idx)

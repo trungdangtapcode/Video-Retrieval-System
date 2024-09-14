@@ -97,14 +97,15 @@
         f = Math.floor(video.currentTime * fps)
         currenttimeshow.innerHTML = `${m}:${("0"+s).slice(-2)}(${x.toFixed(2)}) - ${f}`
     }
-    document.addEventListener('keydown', (even)=>{
-        if(even.key == 'ArrowRight'){
-            video.currentTime += 2
+    document.addEventListener('keydown', (event)=>{
+        speedmove = event.shiftKey ? 5 : 2
+        if(event.key == 'ArrowRight'){
+            video.currentTime += speedmove
         }
-        if(even.key == 'ArrowLeft'){
-            video.currentTime -= 2
+        if(event.key == 'ArrowLeft'){
+            video.currentTime -= speedmove
         }
-        if (even.key == ' '){
+        if (event.key == ' '){
             if(video.paused){
                 video.play()
             }else{

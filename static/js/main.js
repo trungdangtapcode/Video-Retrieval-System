@@ -39,8 +39,9 @@ function loadData(){
     video_grid = document.getElementById('videoGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         if (keyframe_to_video[frame_data['video']]==undefined){
+            newold = frame_data['video'].slice(-1)=='n'?'newkeyframe':'oldkeyframe'
             el = createElementFromHTML(`
-                <div id="imgGridResults" class="gridcontainer">
+                <div id="imgGridResults" class="gridcontainer ${newold}">
                     <h2 style='
                     width:100%; text-align:center; 
                     align-self:center; font-size: 2em;'>
@@ -75,6 +76,10 @@ loadData()
 loadPallete()
 changeDisplayStyle()
 changeDisplayStyle()
+change_newold()
+change_newold()
+change_newold()
+
 for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
     box = document.getElementsByTagName('textarea')[i]
     box.addEventListener("keypress", (e) => {
@@ -165,7 +170,7 @@ function queryByIdxDinov2(idx){
 
 document.getElementById("request").addEventListener("submit", async function(eventObj) {
     addParam("last_displayStyle",displayStyle)
-
+    addParam("last_newold",newold)
     form = document.getElementById('request')
     select_box = document.getElementById("query-type");
     if (select_box.value=='image'){
@@ -297,6 +302,44 @@ function loadPallete(){
     window.defaultPaletteBox = document.getElementsByClassName("dragbox")[2]
 }
 
+function change_newold(){
+    if (newold=='newkeyframe'){
+        newold = 'oldkeyframe'
+        els = document.getElementsByClassName('newkeyframe')
+        for (let el of els){
+            el.style.display = 'none'
+        }
+        els = document.getElementsByClassName('oldkeyframe')
+        for (let el of els){
+            el.style.display = (el.classList.contains('gridcontainer')?'grid':'block')
+        }
+    } else if (newold=='oldkeyframe') {
+        newold = 'newold'
+        els = document.getElementsByClassName('newkeyframe')
+        for (let el of els){
+            el.style.display = (el.classList.contains('gridcontainer')?'grid':'block')
+        }
+        els = document.getElementsByClassName('oldkeyframe')
+        for (let el of els){
+            el.style.display = (el.classList.contains('gridcontainer')?'grid':'block')
+        }
+    } else {
+        newold = 'newkeyframe'
+        els = document.getElementsByClassName('newkeyframe')
+        for (let el of els){
+            el.style.display = (el.classList.contains('gridcontainer')?'grid':'block')
+        }
+        els = document.getElementsByClassName('oldkeyframe')
+        for (let el of els){
+            el.style.display = 'none'
+        }
+    }
+    document.getElementById('newold-text').innerText = newold
+    return newold
+}
+
+
+
 shortcut.add("CTRL+E", function() {
     let boxes = document.getElementsByTagName('textarea')
     for (let box of boxes){
@@ -327,6 +370,9 @@ shortcut.add("ALT+A", function() {
 shortcut.add("ALT+S", function() {
     let box = document.getElementById('num-clip-query')
     box.focus()
+});
+shortcut.add("CTRL+H", function() {
+    change_newold()
 });
 
 function translate(text){
@@ -371,6 +417,10 @@ function addParam(key, value){
     input.name = key;
     input.value = value;
     form.appendChild(input);
+}
+function submit(){
+    form = document.getElementById('request')
+    form.submit()
 }
 
 window.queryByIdxDinov2 = queryByIdxDinov2

@@ -5,6 +5,7 @@ import json
 
 
 EMBEDDING_SERVER = ""
+EMBEDDING_SERVER_INTERNVIDEO = ""
 
 def text_feature(text: str, model_name: str):
     pickled = json.loads(requests.get(EMBEDDING_SERVER+f'/text_{model_name}/'+text).text)

@@ -85,6 +85,7 @@
               </div>
             </div>
           </div>
+          <h2 id="newold-text"></h2>
         </div>
         <div class="contentGrid" id="content"
         style="height: 100%;">
@@ -185,7 +186,11 @@
   function closePopup(){
     document.getElementById("popupOverlay").classList.remove("show")
   }
-  function openPopup(idx){
+  function openPopup(idx, isMiddle=false){
+    if (isMiddle){
+      window.open("slide?id=" + idx, '_blank').focus();
+      return
+    }
     popup_iframe = document.getElementById("popup-iframe")
     popup_iframe.src = "slide?id=" + idx
     document.getElementById("popupOverlay").classList.add("show")
@@ -201,6 +206,7 @@
     }
   }
   var displayStyle = '{{last_displayStyle}}'
+  var newold = '{{last_newold}}'
 </script>
 <script src="{{url_for('static', path='/js/shortcut.js')}}"></script>
 <script src="{{url_for('static', path='/js/main.js')}}"></script>

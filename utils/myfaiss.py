@@ -8,16 +8,16 @@ class FaissDB:
                 bin_file_path_CLIP, bin_file_path_DINOv2,
                 clip_backbone="ViT-B/32", device = "cuda"):
         self.index = {}
-        self.index['ALIGN'] = faiss.read_index(bin_file_path_ALIGN)
+        # self.index['ALIGN'] = faiss.read_index(bin_file_path_ALIGN)
         self.index['CLIP'] = faiss.read_index(bin_file_path_CLIP)
         resource = [faiss.StandardGpuResources()]
-        self.index['ALIGN'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['ALIGN'])
+        # self.index['ALIGN'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['ALIGN'])
         self.index['CLIP'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['CLIP'])
         self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
         # self.model, _ = clip.load(clip_backbone, device=device)
         # self.device = device
         print('Checking embedding server...')
-        self.text_search('Deutsches Rotes Kreuz Kriseninterventionsteam, HTV9, 06:44:01', 5, 'ALIGN')
+        self.text_search('Deutsches Rotes Kreuz Kriseninterventionsteam, HTV9, 06:44:01', 5, 'CLIP')
 
     def text_search(self, text: str, k: int, model_name: str):
         # text_tokens = clip.tokenize([text]).to(self.device)
@@ -27,10 +27,11 @@ class FaissDB:
         if (norm!=0):
             text_features /= norm
         
-
+        assert np.isnan(text_features).any()==False
         scores, idx_image = self.index[model_name].search(text_features, k=k)
         idx_image = idx_image.squeeze()
         scores = scores.squeeze()
+        assert np.isnan(scores).any()==False
 
         return idx_image, scores
     
