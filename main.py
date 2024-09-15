@@ -24,11 +24,13 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://26.48.117.115/"
-EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
+EMBEDDING_SERVER = "http://192.168.1.2:8000/"
+EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.1.2:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/clip1_new.index"
 BIN_DINOV2_PATH = "../preprocess/dino1_new.index"
+BIN_INTERVIDEO_SPACE_PATH = "../preprocess/internVideoSpace.index"
+BIN_INTERVIDEO_TIME_PATH = "../preprocess/internVideoTime.index"
 KEYFRAMES_JSON = "../preprocess/keyframespath1_new.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
@@ -36,6 +38,8 @@ RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes1_new.json"
+INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/internSpace_to_index.json"
+INTERNVIDEO_TIME_MAP_PATH = "../preprocess/internTime_to_index.json"
 CHUNK_SIZE = 1024 * 1024
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
@@ -56,7 +60,8 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH)
+db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
+    BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -72,6 +77,13 @@ thumbnailidx2path = imgidx2path
 
 keyframes_path = json.load(open(KEYFRAMES_JSON))
 keyframes_mapping = json.load(open(KEYFRAMES_MAPPING_PATH))
+internvideo_space_map_index = json.load(open(INTERNVIDEO_SPACE_MAP_PATH))
+internvideo_time_map_index = json.load(open(INTERNVIDEO_TIME_MAP_PATH))
+# I, _ = db.text_search_internvideo_space('his photograph shows a man in a blue uniform, who appears to be a prisoner or suspect, sitting at a table signing papers. Sitting across from him is a police officer, dressed in a green uniform, who is instructing or supervising the signing process. The scene looks like an office or police facility, with a barred window and a wooden wall with many small holes behind it. The scene suggests that this may be an interrogation or deposition in an official investigation.',15,internvideo_space_map_index)
+# for idx in I:
+#     num = utils.get_frame_number_in_video(keyframes_path[idx])
+#     video = utils.get_video_keyframe_path(keyframes_path[idx])
+#     print(num, video)
 
 app.mount("/palette", StaticFiles(directory="static/palette"), name="home")
 app.mount("/concac", StaticFiles(directory="static"), name="static")
@@ -112,13 +124,29 @@ async def home(request: Request, scene_description: str|None = '',
         scene_description != None and scene_description != '' and
         next_scene_description != None and next_scene_description != ''):
         # k = min(num_clip_query, 1000)
-        k1 = 800
-        k2 = 500
+        k1 = 1800
+        k2 = 1500
         assert k1*k2 >= num_show_query
         img_idx1, scores1 = db.text_search(scene_description, k1, model_name)
         img_idx2, scores2 = db.text_search(next_scene_description, k2, model_name)
         img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, 
                             num_clip_query, keyframes_mapping)
+    if (query_type=='text_ivs' and scene_description != None and scene_description != ''):
+        img_idx, scores = db.text_search_internvideo_space(scene_description, num_clip_query, internvideo_space_map_index)
+    if (query_type=='text_ivt' and scene_description != None and scene_description != ''):
+        img_idx, scores = db.text_search_internvideo_time(scene_description, num_clip_query, internvideo_time_map_index)
+    if (query_type=='texttext_ivt' and 
+        scene_description != None and scene_description != '' and
+        next_scene_description != None and next_scene_description != ''):
+        # k = min(num_clip_query, 1000)
+        k1 = 1800
+        k2 = 1500
+        assert k1*k2 >= num_show_query
+        img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
+        img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
+        img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, 
+                            num_clip_query, keyframes_mapping)
+
     data = []
     if (not img_idx is None):
         for idx, score in zip(img_idx,scores):

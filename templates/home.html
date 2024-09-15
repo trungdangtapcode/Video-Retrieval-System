@@ -46,7 +46,7 @@
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Xi_Jinping_March_2017.jpg/640px-Xi_Jinping_March_2017.jpg">
               </div>
             </div>
-            <div class="bbox-submit-button" onclick="bbox_submit()">Click Me</div>
+            <div class="bbox-submit-button" onclick="bbox_submit(event)">Click Me</div>
             <div class="headerItem">
               <div id="qbe" class="font-normal">
                 <div id="filter" class="advanced" style="display: block">
@@ -109,7 +109,7 @@
               placeholder="OCR/ASR.. (string query)" value="{{string_query}}" id="ocr-box"/>
             <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
               value={{num_clip_query}} size="50" style="width: 50px;" id="num-clip-query" />
-            <div class="select">
+            <div class="select" style="display: none;">
               <select id="model-name" name="model_name">
                 <option value="CLIP" selected="selected">CLIP</option>
                 <option value="ALIGN">ALIGN</option>
@@ -119,13 +119,16 @@
               <select id="query-type" name="query_type"
                 style="font-size: 18px">
                 <option value="text" selected="selected">Text query</option>
-                <option value="url">URL query</option>
+                <option value="url" hidden>URL query</option>
                 <option value="image">Image query</option>
                 <option value="idx" hidden>idx</option>
                 <option value="dinov2" hidden>dinov2</option>
-                <option value="ocr">OCR</option>
+                <option value="ocr" hidden>OCR</option>
                 <option value="od" hidden>OD</option>
                 <option value="texttext">Text->Text</option>
+                <option value="text_ivs">Text IVSpace</option>
+                <option value="text_ivt">Text IVTime</option>
+                <option value="texttext_ivt">TextText IVT</option>
               </select>
             </div>
             <div class="select" style="display: none;">

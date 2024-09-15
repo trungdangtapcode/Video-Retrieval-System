@@ -39,7 +39,7 @@ function loadData(){
     video_grid = document.getElementById('videoGridResults')
     for (const [idx, frame_data] of jsonFile.entries()) {
         if (keyframe_to_video[frame_data['video']]==undefined){
-            newold = frame_data['video'].slice(-1)=='n'?'newkeyframe':'oldkeyframe'
+            let newold = frame_data['video'].slice(-1)=='n'?'newkeyframe':'oldkeyframe'
             el = createElementFromHTML(`
                 <div id="imgGridResults" class="gridcontainer ${newold}">
                     <h2 style='
@@ -76,6 +76,7 @@ loadData()
 loadPallete()
 changeDisplayStyle()
 changeDisplayStyle()
+
 change_newold()
 change_newold()
 change_newold()
@@ -86,10 +87,14 @@ for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
         if (e.key === "Enter") {
             e.preventDefault();
             form = document.getElementById('request')
-            if (form['query_type'].value != 'text' && form['query_type'].value != 'texttext'){
+            if (form['query_type'].value != 'text' && form['query_type'].value != 'texttext'
+                && form['query_type'].value != 'text_ivs'
+                && form['query_type'].value != 'text_ivt'
+                && form['query_type'].value != 'texttext_ivt'
+            ){
                 form['query_type'].value = 'text'
             }
-            form.submit();
+            submit(e);
         }
     })
 }
@@ -98,7 +103,7 @@ document.getElementById('ocr-box').addEventListener("keypress", (e) => {
         e.preventDefault();
         form = document.getElementById('request')
         form['query_type'].value = 'ocr'
-        form.submit();
+        submit(e);
     }
 })  
 document.getElementById('url-textbox').addEventListener("keypress", (e) => {
@@ -106,7 +111,7 @@ document.getElementById('url-textbox').addEventListener("keypress", (e) => {
         e.preventDefault();
         form = document.getElementById('request')
         form['query_type'].value = 'url'
-        form.submit();
+        submit(e);
     }
 }) 
 
@@ -130,19 +135,19 @@ shortcut.add("CTRL+1", function() {
 });
 shortcut.add("CTRL+2", function() {
     select_box = document.getElementById("query-type");
-    changeSelected(select_box,'url')
+    changeSelected(select_box,'image')
 });
 shortcut.add("CTRL+3", function() {
     select_box = document.getElementById("query-type");
-    changeSelected(select_box,'image')
+    changeSelected(select_box,'texttext')
 });
 shortcut.add("CTRL+4", function() {
     select_box = document.getElementById("query-type");
-    changeSelected(select_box,'ocr')
+    changeSelected(select_box,'text_ivs')
 });
 shortcut.add("CTRL+5", function() {
     select_box = document.getElementById("query-type");
-    changeSelected(select_box,'texttext')
+    changeSelected(select_box,'text_ivt')
 });
 document.addEventListener('keydown',(event)=>{
     if (event.key=='Escape'){
@@ -159,16 +164,15 @@ function queryByIdx(idx){
     addParam("idx_query",idx)
     form = document.getElementById('request')
     form['query_type'].value = 'idx'
-    form.submit()
+    submit()
 }
 function queryByIdxDinov2(idx){
     addParam("idx_query",idx)
     form = document.getElementById('request')
     form['query_type'].value = 'dinov2'
-    form.submit()
+    submit()
 }
-
-document.getElementById("request").addEventListener("submit", async function(eventObj) {
+async function beforeSubmit(eventObj) {
     addParam("last_displayStyle",displayStyle)
     addParam("last_newold",newold)
     form = document.getElementById('request')
@@ -204,7 +208,8 @@ document.getElementById("request").addEventListener("submit", async function(eve
     //     this.appendChild(input);
     // }
     return true;
-});
+}
+document.getElementById("request").addEventListener("submit", (eventObj)=>beforeSubmit(eventObj));
 
 function allowDrop(ev) {
     ev.preventDefault();
@@ -258,7 +263,7 @@ function dropPalette(ev) {
     palette.style.resize = 'both'
 }
 
-function bbox_submit(){
+function bbox_submit(e){
     var boxes = whiteboard.childNodes;
     res = ''
     for(var i=0, len = whiteboard.childElementCount ; i < len; ++i){
@@ -282,7 +287,7 @@ function bbox_submit(){
     addParam("od_query",res)
     form = document.getElementById('request')
     form['query_type'].value = 'od'
-    form.submit()
+    submit(e)
 }
 // window.bbox_submit = bbox_submit
 
@@ -418,8 +423,9 @@ function addParam(key, value){
     input.value = value;
     form.appendChild(input);
 }
-function submit(){
+function submit(e){
     form = document.getElementById('request')
+    beforeSubmit(e)
     form.submit()
 }
 
