@@ -343,6 +343,44 @@ function change_newold(){
     return newold
 }
 
+async function autoSubmit(numSubmit, startPos){
+    if (data_reponse&&data_reponse.length!=0){
+        jsonFile = data_reponse
+    } else {
+        jsonFile = getJSON('data.json')
+    }
+    if (startPos >= jsonFile.length){
+        return
+    }
+    jsonFile = jsonFile.slice(startPos,)
+    let paramList = []
+    for (let i = 0; i < numSubmit; i++){
+        let kframe = jsonFile[i%jsonFile.length]['frame_index'];
+        let submit = new XMLHttpRequest();
+        var params = `idx=${kframe}&isKeyframe=true`
+        submit.open("POST", "/submit?" + params, true);
+        submit.send(null);
+        paramList.push(params)
+    }
+    let cntSubmitted = 0
+    let callback = function(){
+        let params = paramList[cntSubmitted]
+        let submit = new XMLHttpRequest();
+        submit.open("POST", "/submit?" + params, true);
+        submit.onreadystatechange = function() {
+            if (submit.readyState == 4 && submit.status == 200) {
+                cntSubmitted += 1
+                toastr.success(`${cntSubmitted}/${numSubmit} saved`);
+                console.log(cntSubmitted)
+                if (cntSubmitted < numSubmit){
+                    callback()
+                }
+            }
+        }
+        submit.send(null)
+    }
+    callback()
+}
 
 
 shortcut.add("CTRL+E", function() {
@@ -379,6 +417,18 @@ shortcut.add("ALT+S", function() {
 shortcut.add("CTRL+H", function() {
     change_newold()
 });
+shortcut.add("CTRL+S", async function() {
+    let text = prompt("Enter number submit (num of frames, start pos[optional])", "10,0");
+    idx = text.indexOf(',')
+    if (idx==-1){
+        numSubmit = parseInt(text)
+        startPos = 0
+    } else {
+        numSubmit = parseInt(text.slice(0,idx))
+        startPos = parseInt(text.slice(idx+1))
+    }
+    autoSubmit(numSubmit, startPos)
+})
 
 function translate(text){
     var request = new XMLHttpRequest();

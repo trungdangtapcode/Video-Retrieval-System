@@ -24,20 +24,20 @@ def check_valid_url(url):
         return False
 
 
-EMBEDDING_SERVER = "http://192.168.1.2:8000/"
-EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.1.2:8000/'
+EMBEDDING_SERVER = "http://26.48.117.115:80/"
+EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
-BIN_CLIP_PATH = "../preprocess/clip1_new.index"
-BIN_DINOV2_PATH = "../preprocess/dino1_new.index"
+BIN_CLIP_PATH = "../preprocess/clip12_new.index"
+BIN_DINOV2_PATH = "../preprocess/dino12_new.index"
 BIN_INTERVIDEO_SPACE_PATH = "../preprocess/internVideoSpace.index"
 BIN_INTERVIDEO_TIME_PATH = "../preprocess/internVideoTime.index"
-KEYFRAMES_JSON = "../preprocess/keyframespath1_new.json"
+KEYFRAMES_JSON = "../preprocess/keyframespath12_new.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
-KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes1_new.json"
+KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes12_new.json"
 INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/internSpace_to_index.json"
 INTERNVIDEO_TIME_MAP_PATH = "../preprocess/internTime_to_index.json"
 CHUNK_SIZE = 1024 * 1024
@@ -139,8 +139,8 @@ async def home(request: Request, scene_description: str|None = '',
         scene_description != None and scene_description != '' and
         next_scene_description != None and next_scene_description != ''):
         # k = min(num_clip_query, 1000)
-        k1 = 1800
-        k2 = 1500
+        k1 = 800
+        k2 = 500
         assert k1*k2 >= num_show_query
         img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
         img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
@@ -233,6 +233,7 @@ async def root(request: Request,
     video_resized_keyframes_path = []
     video_keyframes_id = []
     ##>500 => window not sort
+    print(video)
     sorted_frames = sorted(
         os.listdir(KEYFRAMES_PATH+'/'+video), 
         key = lambda x: int(x.split('.')[0]))
@@ -252,10 +253,17 @@ async def root(request: Request,
 
 
 @app.get("/showvideo")
-async def home(request: Request, id: int|None = 12):
-    video = keyframes_mapping[id]['video']
-    timestamp = keyframes_mapping[id]['timestamp']
-    fps = keyframes_mapping[id]['fps']
+async def home(request: Request, id: int|None = 12,
+               video_inp: str|None = None,
+               frame_idx_inp: int|None = None):
+    if (video_inp!=None and frame_idx_inp!=None):
+        video = video_inp
+        frame_idx = frame_idx_inp
+        fps = 25
+    else:    
+        video = keyframes_mapping[id]['video']
+        timestamp = keyframes_mapping[id]['timestamp']
+        fps = keyframes_mapping[id]['fps']
     return templates.TemplateResponse(
         "video.html", context={
             "request": request, 

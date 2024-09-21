@@ -9,7 +9,13 @@ human_face.png (humanface.png)
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
 
-
+// let submit = submitList[cntSubmitted]
+// submit.onreadystatechange = function() {
+//     if (submit.readyState == 4 && submit.status == 200) {
+//         cntSubmitted += 1
+//         toastr.success(`${cntSubmitted}/${kframe} saved`);
+//     }
+// }
 ============================================
 <input type="number" name="num_clip_query" class="large-placeholder" placeholder="Number of CLIP neareset"
               value={{num_clip_query}} size="50" style="width: 50px; padding: 10px; 

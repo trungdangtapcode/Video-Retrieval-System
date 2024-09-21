@@ -3,6 +3,9 @@ import faiss
 import numpy as np
 from utils.embeddingserver import text_feature, image_feature_file, image_feature_url, text_feature_internvideo
 
+import json
+tmp = json.load(open('../test/210924.json'))
+
 class FaissDB:
     def __init__(self, bin_file_path_ALIGN,
                 bin_file_path_CLIP, bin_file_path_DINOv2,
@@ -15,7 +18,7 @@ class FaissDB:
         resource = [faiss.StandardGpuResources()]
         # self.index['ALIGN'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['ALIGN'])
         self.index['CLIP'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['CLIP'])
-        self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
+        # self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
         # self.index_intervideo_space = faiss.read_index(bin_file_path_internVideo_space)
         # self.index_intervideo_time = faiss.read_index(bin_file_path_internVideo_time)
         # self.index_intervideo_space = faiss.index_cpu_to_gpu_multiple_py(resource, self.index_intervideo_space)
@@ -134,6 +137,7 @@ class FaissDB:
         scores, idx_image = self.index_intervideo_time.search(text_features, k=k)
         idx_image = idx_image.squeeze()
         scores = scores.squeeze()
+        print('NAME',[tmp[x] for x in idx_image[:20]])
         print('BEFORE',idx_image[:10])
         for i in range(len(idx_image)):
             idx_image[i] = mapping[idx_image[i]]
