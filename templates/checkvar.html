@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check var</title>
+    <script>
+        function promptAndRedirect() {
+            var userInput = prompt("Video name, frame index, qa(optional)","L01_V001,10000,12");
+            let lst = userInput.split(",");
+            video = lst[0].trim()+'.mp4';
+            frame = lst[1].trim();
+            if (userInput) {
+                url = `showvideo?video_inp=${video}&frame_idx_inp=${frame}`;
+                history.pushState(null, '', 'checkvar');
+                // window.location.assign(url);
+                // window.location.href = url;
+                window.open(url,"_self");
+                // window.location.replace(url);
+            }
+        }
+    </script>
+</head>
+<body onclick="promptAndRedirect()">
+    <h1 style="font-size: 200px;">CLICK ME....</h1>
+</body>
+</html>

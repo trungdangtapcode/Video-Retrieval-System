@@ -9,6 +9,10 @@ human_face.png (humanface.png)
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
 
+=======================================
+submit.open("POST", "/submit?" + params, true);
+submit.send(null);
+
 // let submit = submitList[cntSubmitted]
 // submit.onreadystatechange = function() {
 //     if (submit.readyState == 4 && submit.status == 200) {

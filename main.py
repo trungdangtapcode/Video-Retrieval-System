@@ -25,21 +25,21 @@ def check_valid_url(url):
 
 
 EMBEDDING_SERVER = "http://26.48.117.115:80/"
-EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
+EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.0.106:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/clip12_new.index"
 BIN_DINOV2_PATH = "../preprocess/dino12_new.index"
-BIN_INTERVIDEO_SPACE_PATH = "../preprocess/internVideoSpace.index"
-BIN_INTERVIDEO_TIME_PATH = "../preprocess/internVideoTime.index"
+BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch2/space_batch12.index"
+BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch2/time_batch12.index"
 KEYFRAMES_JSON = "../preprocess/keyframespath12_new.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
-OCR_WHOOSH_PATH = "../preprocess/whooshdir"
+OCR_WHOOSH_PATH = "../preprocess/whooshdir_batch12"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes12_new.json"
-INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/internSpace_to_index.json"
-INTERNVIDEO_TIME_MAP_PATH = "../preprocess/internTime_to_index.json"
+INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch2/internSpace2_to_index.json"
+INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch2/internTime2_to_index.json"
 CHUNK_SIZE = 1024 * 1024
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
@@ -94,6 +94,8 @@ app.mount("/data", StaticFiles(directory=DATA_PATH), name="data")
 async def root():
     return "hello"
 
+tmp = json.load(open('../preprocess/ocr_batch2/combined.json'))
+whoosh_mapping = list(range(106589)) + list(range(298000,298000+94657))
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request, scene_description: str|None = '',
             num_clip_query: int = 60, url_query: str|None = '',
@@ -111,6 +113,13 @@ async def home(request: Request, scene_description: str|None = '',
         img_idx, scores = db.url_search(url_query, num_clip_query, model_name)
     if (query_type=='text' and scene_description != None and scene_description != ''):
         img_idx, scores = db.text_search(scene_description,num_clip_query, model_name)
+        # for i in range(len(img_idx)):
+        #     print(len(tmp),img_idx[i],img_idx[i] if img_idx[i] < 106589 else img_idx[i]-298000)
+        #     if (img_idx[i] not in whoosh_mapping or img_idx[i] < 106589):
+        #         img_idx[i] = 0
+        #         continue
+        #     if ("70" not in tmp[img_idx[i] if img_idx[i] < 106589 else img_idx[i]-298000]):
+        #         img_idx[i] = 0
     if (query_type=='idx' and idx_query != None):
         img_idx, scores = db.idx_search(idx_query,num_clip_query, model_name)
     if (query_type=='dinov2' and idx_query != None):
@@ -139,8 +148,9 @@ async def home(request: Request, scene_description: str|None = '',
         scene_description != None and scene_description != '' and
         next_scene_description != None and next_scene_description != ''):
         # k = min(num_clip_query, 1000)
-        k1 = 800
-        k2 = 500
+        print("QUERY OK.. start compare")
+        k1 = 1800
+        k2 = 1500
         assert k1*k2 >= num_show_query
         img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
         img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
@@ -252,14 +262,15 @@ async def root(request: Request,
     )
 
 
+import cv2
 @app.get("/showvideo")
 async def home(request: Request, id: int|None = 12,
                video_inp: str|None = None,
                frame_idx_inp: int|None = None):
     if (video_inp!=None and frame_idx_inp!=None):
         video = video_inp
-        frame_idx = frame_idx_inp
-        fps = 25
+        fps = cv2.VideoCapture(DATA_PATH+'/video/'+video).get(cv2.CAP_PROP_FPS)
+        timestamp = frame_idx_inp/fps
     else:    
         video = keyframes_mapping[id]['video']
         timestamp = keyframes_mapping[id]['timestamp']
@@ -313,6 +324,14 @@ async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None =
 @app.get("/translate")
 async def translate(request: Request, text: str, dest: str = 'en', src = 'vi'):
     return utils.translate.translate(text, dest, src)
+
+@app.get("/checkvar")
+async def checkvar(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="checkvar.html", context={
+        }, data = "con cac"
+    )
+
 
 @app.post("/get_file_local")
 async def get_file_local(request: Request, file: UploadFile = File(...)):

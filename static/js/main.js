@@ -358,8 +358,6 @@ async function autoSubmit(numSubmit, startPos){
         let kframe = jsonFile[i%jsonFile.length]['frame_index'];
         let submit = new XMLHttpRequest();
         var params = `idx=${kframe}&isKeyframe=true`
-        submit.open("POST", "/submit?" + params, true);
-        submit.send(null);
         paramList.push(params)
     }
     let cntSubmitted = 0
@@ -371,7 +369,6 @@ async function autoSubmit(numSubmit, startPos){
             if (submit.readyState == 4 && submit.status == 200) {
                 cntSubmitted += 1
                 toastr.success(`${cntSubmitted}/${numSubmit} saved`);
-                console.log(cntSubmitted)
                 if (cntSubmitted < numSubmit){
                     callback()
                 }
@@ -419,6 +416,7 @@ shortcut.add("CTRL+H", function() {
 });
 shortcut.add("CTRL+S", async function() {
     let text = prompt("Enter number submit (num of frames, start pos[optional])", "10,0");
+    if(text==null) return
     idx = text.indexOf(',')
     if (idx==-1){
         numSubmit = parseInt(text)

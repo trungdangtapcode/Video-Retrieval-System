@@ -8,6 +8,7 @@ import numpy as np
 OCR_WHOOSH_PATH = ''
 # Define the schema: A single text field named "content"
 schema = Schema(content=TEXT(stored=True))
+whoosh_mapping = list(range(106589)) + list(range(298000,298000+94657))
 
 ix = None
 def init():
@@ -37,4 +38,5 @@ def get_ocr(query_str, limit):
         # for result in results:
         #     print(" -OCR: ",result['content'])
     # return np.array([x.docnum for x in results])
+    ids = [whoosh_mapping[x] for x in ids]
     return np.array(ids)

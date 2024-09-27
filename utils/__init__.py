@@ -37,13 +37,16 @@ def metric_2_ids(idx1, scores1, idx2, scores2, k, mapping):
             # score = score1**2*score2*1/sqrt(t2-t1+50)
             # score = score1**2*score2*1/sqrt(id2-id1+25)
             res.append((score, id1, id2, score1, score2))
+    print('SORTING')
     res.sort(reverse=True)
     assert k <= len(res)
     res = res[:k]
+
     ids = [x[1] for x in res]
     scores = [x[0] for x in res]
     for i in range(20):
         print(i+1,'.',ids[i], res[i][2], res[i][3], res[i][4],' = ', scores[i])
+
     return ids, scores
 
 def get_newold_from_path(path):
