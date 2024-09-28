@@ -33,6 +33,7 @@ function loadData(){
         jsonFile = data_reponse
     } else {
         jsonFile = getJSON('data.json')
+        alert('Current request is not valid, loaded the lastest reponse')
     }
     //count videos
     keyframe_to_video = {}
@@ -263,7 +264,7 @@ function dropPalette(ev) {
     palette.style.resize = 'both'
 }
 
-function bbox_submit(e){
+function bbox_submit(e, include_text=false){
     var boxes = whiteboard.childNodes;
     res = ''
     for(var i=0, len = whiteboard.childElementCount ; i < len; ++i){
@@ -286,7 +287,7 @@ function bbox_submit(e){
     }
     addParam("od_query",res)
     form = document.getElementById('request')
-    form['query_type'].value = 'od'
+    form['query_type'].value = (include_text?'text_od':'od')
     submit(e)
 }
 // window.bbox_submit = bbox_submit

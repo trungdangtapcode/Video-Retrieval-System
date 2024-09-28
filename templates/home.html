@@ -46,7 +46,9 @@
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Xi_Jinping_March_2017.jpg/640px-Xi_Jinping_March_2017.jpg">
               </div>
             </div>
-            <div class="bbox-submit-button" onclick="bbox_submit(event)">Click Me</div>
+            <div class="bbox-submit-button" onclick="bbox_submit(event, false)">Click Me</div>
+            <div class="bbox-submit-button" style="background-color: aqua;"
+             onclick="bbox_submit(event, true)">Click Me</div>
             <div class="headerItem">
               <div id="qbe" class="font-normal">
                 <div id="filter" class="advanced" style="display: block">
@@ -129,6 +131,7 @@
                 <option value="text_ivs">Text IVSpace</option>
                 <option value="text_ivt">Text IVTime</option>
                 <option value="texttext_ivt">TextText IVT</option>
+                <option value="text_od" hidden>Text+OD</option>
               </select>
             </div>
             <div class="select" style="display: none;">

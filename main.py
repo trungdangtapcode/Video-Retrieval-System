@@ -28,6 +28,7 @@ EMBEDDING_SERVER = "http://26.48.117.115:80/"
 EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.0.106:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/clip12_new.index"
+BIN_CLIP_PATH_OLDKEYFRAME = "../preprocess/clip12_oldonly.index"
 BIN_DINOV2_PATH = "../preprocess/dino12_new.index"
 BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch2/space_batch12.index"
 BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch2/time_batch12.index"
@@ -37,6 +38,7 @@ KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir_batch12"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
+CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR.json"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes12_new.json"
 INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch2/internSpace2_to_index.json"
 INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch2/internTime2_to_index.json"
@@ -48,6 +50,8 @@ utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
 utils.ocr.init()
 utils.co_detr.DIRECTORY_INDEX = CODETR_DIRECTORY
 utils.co_detr.init()
+
+od_corpus = json.load(open(CODETR_COPUS_DIRECTORY))
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -61,7 +65,7 @@ class NpEncoder(json.JSONEncoder):
 
 app = FastAPI()
 db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
-    BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH)
+    BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH,BIN_CLIP_PATH_OLDKEYFRAME)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -148,14 +152,23 @@ async def home(request: Request, scene_description: str|None = '',
         scene_description != None and scene_description != '' and
         next_scene_description != None and next_scene_description != ''):
         # k = min(num_clip_query, 1000)
-        print("QUERY OK.. start compare")
         k1 = 1800
         k2 = 1500
         assert k1*k2 >= num_show_query
         img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
         img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
+        print("QUERY OK.. start compare (intern)")
         img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, 
                             num_clip_query, keyframes_mapping)
+    if (query_type=='text_od' and scene_description != None and scene_description != ''
+        ):
+        k1 = 3000
+        # k2 = 10000
+        img_idx1, scores1 = db.text_search_oldkeyframe(scene_description, k1)
+        # img_idx2, scores2 = utils.co_detr.get_top_k(od_query, k2)
+        print("QUERY OK.. start compare (od)", scene_description, od_query)
+        # print(img_idx1[:10], img_idx2[:10])
+        img_idx, scores = utils.metric_2_ids_text_od(img_idx1, od_query, od_corpus , num_clip_query)
 
     data = []
     if (not img_idx is None):

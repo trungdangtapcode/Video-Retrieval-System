@@ -9,6 +9,26 @@ human_face.png (humanface.png)
 black,blue,brown,green,grey,orange,pink,purple,red,white,yellow
 
 
+
+=========================================
+    dict_idx2 = {}
+    for i, idx in enumerate(idx2):
+        dict_idx2[idx] = i+1
+    res = []
+    for i, idx in enumerate(idx1):
+        if (idx in dict_idx2):
+            score = 8.0/(dict_idx2[idx]+60)
+        else: 
+            score = 0
+        score += 1.0/(i+1+60)
+        res.append((score, idx))
+    res.sort(reverse=True)
+    if (len(res)>k):
+        res = res[:k]
+    print(res)
+    ids = [x[1] for x in res]
+    scores = [x[0] for x in res]
+    return ids, scores
 =======================================
 submit.open("POST", "/submit?" + params, true);
 submit.send(null);
