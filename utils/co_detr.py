@@ -3,6 +3,8 @@ import Stemmer  # optional: for stemming
 import numpy as np
 stemmer = Stemmer.Stemmer("english")
 
+bm25_mapping = list(range(106589)) + list(range(298000,298000+94657))
+
 DIRECTORY_INDEX = ''
 retriever = None
 ids = None
@@ -17,4 +19,4 @@ def get_top_k(query: str, k: int):
     results, scores = retriever.retrieve(query_tokens, corpus = ids, k=k)
     value, _ = retriever.retrieve(query_tokens, corpus = retriever.corpus, k=k)
     # print(value)
-    return np.array(results[0]), np.array(scores[0])
+    return np.array([bm25_mapping[x] for x in results[0]]), np.array(scores[0])

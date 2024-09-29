@@ -52,14 +52,14 @@ def metric_2_ids(idx1, scores1, idx2, scores2, k, mapping):
 
 def metric_2_ids_text_od(idx1, od_query, corpus, k):
     subcorpus = [
-        corpus[min(x,106589-1)].split(" ") for x in idx1
+        corpus[x].split(" ") for x in idx1
     ]
     bm25 = rank_bm25.BM25Okapi(subcorpus)
     tokenized_query = od_query.split(" ")
     doc_scores = bm25.get_scores(tokenized_query)
     args = np.argsort(doc_scores)[::-1]
     res = [
-        (2.0/(i+60)+1.0/(args[i]+1+60), idx1[args[i]], args[i]) for i in range(len(idx1))
+        (0.85/(i+60)+1.0/(args[i]+1+60), idx1[args[i]], args[i]) for i in range(len(idx1))
     ]
     # res.sort()
     # args = sorted(range(len(res)), key=res.__getitem__)[::-1]

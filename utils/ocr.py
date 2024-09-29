@@ -39,4 +39,4 @@ def get_ocr(query_str, limit):
         #     print(" -OCR: ",result['content'])
     # return np.array([x.docnum for x in results])
     ids = [whoosh_mapping[x] for x in ids]
-    return np.array(ids)
+    return np.array(ids)        

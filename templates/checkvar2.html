@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/visione.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/jquery-ui.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/queryByExample.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/toggle.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/palette.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/popup.css') }}" />
+  <!-- <link rel="stylesheet" href="css/bootstrap.css" /> -->
+
+  <link rel="icon" type="image/x-icon" href="{{url_for('static',path='img/favicon.png')}}">
+  <title>Check var 2</title>
+</head>
+
+<body style="background-image: url('https://i.sstatic.net/kx8MT.gif'); background-size: cover;">
+  <header>
+  </header>
+  <main>
+    <form id="request">
+        <div class="bodyGrid" style="grid-template-columns: 4.2fr 0.3fr;">
+        
+            <div id="resGrid" class="resGrid">
+                <div id="results" class="resGrid2">
+                    <div id="videoGridResults"></div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+  </main>
+</body>
+<script>
+    function createElementFromHTML(htmlString) {
+        var div = document.createElement('div');
+        div.innerHTML = htmlString.trim();
+    
+        // Change this to div.childNodes to support multiple top-level nodes.
+        return div.firstChild;
+    }
+
+    function getTxt(filename){
+        var request = new XMLHttpRequest();
+        request.open("GET", "concac/reponse/submit.txt", false);
+        request.send(null)
+        return request.responseText
+    }
+
+    function addRow(title, content){
+        video_grid = document.getElementById('videoGridResults')
+        titleurl = `concac/reponse/query/${title}.txt`
+        newRow = createElementFromHTML(`
+            <div id="imgGridResults" class="gridcontainer">
+                <a href=${titleurl} target="_blank">
+                <h2 style='
+                width:100%; text-align:center; 
+                align-self:center; font-size: 2em;'>
+                ${title}</h2>
+                </a>
+            </div>`)
+        video_grid.appendChild(newRow)
+        video_grid.appendChild(createElementFromHTML(`<div class="hline"></div>)`))
+        if (content.length > maxImg){
+            content = content.slice(0,maxImg)
+        }
+        for (let ans of content){
+            let lst = ans.split(",");
+            video = lst[0].trim()+'.mp4';
+            frame = lst[1].trim();
+            url = `get_frame?video=${video}&idx=${frame}`
+            urlvideo = `showvideo?video_inp=${video}&frame_idx_inp=${frame}`;
+            img = createElementFromHTML(`
+                <div class="item column-span-1" data-row="3" data-col="0">
+                <a href=${urlvideo} target="_blank"><div class="myimg-thumbnail">
+                <img src=${url} class="myimg">
+                </a></div>
+                </div>
+            `)
+            newRow.appendChild(img)
+        }
+
+    }
+
+    function loadFrame(){
+        text = getTxt()
+        let inp = text.split('\n');
+        let current = null;
+        let res = [];
+        for (let line of inp) {
+            line = line.trim();
+
+            if (line === '') {
+                if (current !== null) {
+                    addRow(current,res)
+                    res = [];
+                    current = null;
+                }
+                continue;
+            }
+
+            if (line[0] === 'q') {
+                current = line;
+            }
+            
+            if (line[0] === 'L') {
+                res.push(line);
+            }
+        }
+        if (current !== null) {
+            addRow(current,res)
+            res = [];
+            current = null;
+        }
+    }
+    maxImg = prompt("The max number of images per query", "5");
+    try {
+        maxImg = parseInt(maxImg)
+    } catch (error) {
+        maxImg = 5
+    }
+    if (!Number.isInteger(maxImg) || maxImg < 1 || maxImg == null){
+        maxImg = 5
+    }
+    loadFrame()
+</script>
+</html>

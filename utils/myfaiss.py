@@ -15,15 +15,15 @@ class FaissDB:
                 clip_backbone="ViT-B/32", device = "cuda"):
         self.index = {}
         # self.index['ALIGN'] = faiss.read_index(bin_file_path_ALIGN)
-        # self.index['CLIP'] = faiss.read_index(bin_file_path_CLIP)
+        self.index['CLIP'] = faiss.read_index(bin_file_path_CLIP)
         resource = [faiss.StandardGpuResources()]
         # self.index['ALIGN'] = faiss.index_cpu_to_gpu_multiple_py(resource, self.index['ALIGN'])
-        # tmp = self.index['CLIP']
-        # self.indexCLIP = faiss.index_cpu_to_gpu_multiple_py(resource, tmp)
-        # del tmp
-        # self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
-        # self.index_intervideo_space = faiss.read_index(bin_file_path_internVideo_space)
-        # self.index_intervideo_time = faiss.read_index(bin_file_path_internVideo_time)
+        tmp = self.index['CLIP']
+        self.indexCLIP = faiss.index_cpu_to_gpu_multiple_py(resource, tmp)
+        del tmp
+        self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
+        self.index_intervideo_space = faiss.read_index(bin_file_path_internVideo_space)
+        self.index_intervideo_time = faiss.read_index(bin_file_path_internVideo_time)
         # self.index_intervideo_space = faiss.index_cpu_to_gpu_multiple_py(resource, self.index_intervideo_space)
         # self.index_intervideo_time = faiss.index_cpu_to_gpu_multiple_py(resource, self.index_intervideo_time)
         # self.model, _ = clip.load(clip_backbone, device=device)

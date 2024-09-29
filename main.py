@@ -37,8 +37,8 @@ DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir_batch12"
-CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_2"
-CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR.json"
+CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_batch12"
+CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_batch12.json"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes12_new.json"
 INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch2/internSpace2_to_index.json"
 INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch2/internTime2_to_index.json"
@@ -345,6 +345,22 @@ async def checkvar(request: Request):
         }, data = "con cac"
     )
 
+@app.get("/checkvar2")
+async def checkvar(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="checkvar2.html", context={
+        }, data = "con cac"
+    )
+
+@app.get("/get_frame")
+async def get_frame(request: Request, idx: int, video: str):
+    if (video[-4:] != '.mp4'): video += '.mp4'
+    cam = cv2.VideoCapture(DATA_PATH+'/video/'+video)
+    cam.set(cv2.CAP_PROP_POS_FRAMES, idx)
+    ret, frame = cam.read()
+    ret, value = cv2.imencode(".jpg", frame)
+    img_bytes = value.tobytes()
+    return Response(content=img_bytes, media_type="image/jpg")
 
 @app.post("/get_file_local")
 async def get_file_local(request: Request, file: UploadFile = File(...)):

@@ -33,7 +33,7 @@ function loadData(){
         jsonFile = data_reponse
     } else {
         jsonFile = getJSON('data.json')
-        alert('Current request is not valid, loaded the lastest reponse')
+        alert('The last query was not modified, loaded the next lastest reponse')
     }
     //count videos
     keyframe_to_video = {}
