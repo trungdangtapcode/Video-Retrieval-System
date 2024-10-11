@@ -1,5 +1,6 @@
 static/thumbnail/*.jpg
 __pycache__/
+data/
 *.pth
 *.bin
 *.index
