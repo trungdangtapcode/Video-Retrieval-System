@@ -1,8 +1,13 @@
-static/thumbnail/*.jpg
-__pycache__/
+**/static/thumbnail/*.jpg
+**/__pycache__/
 data/
+**/index*/
+**/whooshdir*/
 *.pth
 *.bin
 *.index
 *.json
 *.zip
+*.npy
+*.zip
+*.jsonl
