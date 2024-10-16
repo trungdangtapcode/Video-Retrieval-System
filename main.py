@@ -25,7 +25,7 @@ def check_valid_url(url):
 
 
 EMBEDDING_SERVER = "http://26.48.117.115:80/"
-EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.0.106:8000/'
+EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/clip12_new.index"
 BIN_CLIP_PATH_OLDKEYFRAME = "../preprocess/clip12_oldonly.index"

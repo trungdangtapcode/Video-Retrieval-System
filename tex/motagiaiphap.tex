@@ -1,0 +1,268 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath}
+\usepackage{float}
+\title{Mô tả giải pháp}   
+\author{raumuongxaothitbo}
+% \date{October 2024}
+\date{}
+
+\usepackage{fontawesome5}
+\usepackage{hyperref}
+\makeatletter
+\newcommand{\github}[1]{%
+   \href{#1}{\faGithubSquare}%
+}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+% \begin{abstract}
+
+% \end{abstract}
+% \begin{center}
+%     \href{https://github.com/trungdangtapcode/Video-Retrieval-Search}{https://github.com/trungdangtapcode/Video-Retrieval-Search}\github{https://github.com/trungdangtapcode/Video-Retrieval-Search}
+% \end{center} 
+ 
+\section{Preprocess data}
+
+Chia làm 2 nhóm keyframes (keyframes của ban tổ chức và keyframes được trích xuất). Keyframes được trích xuất bằng cv2 và ffmpeg. Sau đó nén ảnh để truyền tải dữ liệu nhanh hơn.
+
+Sử dụng 3 model khác nhau là DFN5B-CLIP-ViT-H-14, DINOv2, BLIP-2 để trích xuất đặc trưng thành các embedded vector cho mỗi keyframes. Và InternVid kết hợp với TransNet cho video (có 2 lựa chọn là embed dựa trên 1 scene và 4 scene liên tiếp nhau). Do sự giới hạn về GPU, nhóm tận dụng 9 tài khoản Kaggle để sử dụng GPU P100 270h/tuần.
+
+Sử dụng model CRAFT để dectect văn bản và TrOCR để nhận diện chữ. ASR thì dùng URL của video để tải caption từ youtube.
+
+Sử dụng Co-DETR để nhận diện vật để. Và sử dụng category tập MSCOCO để chuyển các vị trí vật thể thành dạng văn bảng (vd: 1b\_car, 2c\_car, 4b\_human,...).
+
+\section{Database \github{https://github.com/trungdangtapcode/Video-Retrieval-Search}}
+
+Sử dụng faiss vector database của Meta để tìm kiếm các vector đặc trưng có similarity giống nhau.
+
+Với tìm kiếm bằng văn bản (Object, OCR, ASR), sử dụng thư viện Whoosh và kết hợp với BM25S.
+
+Để kết hợp nhiều input khác nhau, hệ thống sử dụng reciprocal rank fusion (RRS). Đối với việc tìm kiếm hai keyframe kế cận nhau, giải pháp cũng dựa trên RRS để tìm ra metric tương đương: $score = \dfrac{1}{\sqrt{t+60}}\left(2.0\dfrac{sim_1}{rank_1+60}+1.0\dfrac{sim_2}{rank_2+60}\right)$
+
+Do sự giới hạn về phần cứng hệ thống chia ra làm 5 phần: hai laptop, 1 desktop và 2 notebook Kaggle. Do khác biệt về hệ điều hành nên giao tiếp nhau qua API và sử dụng VPN
+
+\begin{itemize}
+    \item Laptop 1: Host server, chạy text database (whoosh và bm25s) và vector database CLIP, DINOv2, InternVid.
+    \item Laptop 2: Chạy server để embed InternVid
+    \item Desktop: Chạy server để embed DFN5B-CLIP-ViT-H-14.
+    \item Kaggle notebook: Chạy server embed và vector database cho BLIP-2. Do database để lưu trữ vector đặc trưng của BLIP-2 rất lớn nên phải chia làm 2 notebook và thay gì sử dụng VPN thì với notebook sẽ public URL bằng ngrok. 
+\end{itemize}
+
+Backend sử dụng Fastapi để host, data streaming và submit. Front end được xây dựng dựa trên VISIONE và thư viện CSS Toastr và Bootstrap hỗ trợ. Thư viện hỗ trợ JS gồm có JQuery và Shortcut.js.
+
+\section{Tìm kiếm dựa trên nhiều keyframe mong muốn}
+Để tìm kiếm keyframe mong muốn, ta tìm vector đặc trưng tương ứng với vector đó ($u$). Ở bước truy vấn, trước tiên embed văn bản query thành vector đặc trưng tương ứng ($v_0$). Ở bước thứ $t$ ($t>0$), người dùng chọn ra bức ảnh gần giống mong muốn và lấy được vector đặc trưng, sau đó hệ thống sẽ tính số điểm lại cho toàn bộ keyframe dựa trên exponential smoothing.
+
+\begin{equation*}
+\begin{split}
+score_t= &\gamma sim(u,v_t)+(1-\gamma)score_{t-1}\\
+&\gamma sim(u,v_t )+\gamma(1-\gamma)sim(u,v_{t-1} )+\gamma(1-\gamma)^2 sim(u,v_{t-2} )+\dotsc
+\end{split}
+\end{equation*}
+
+Sau thi chuẩn hóa vector đặc trưng, việc tính similarity có thể dùng cosine similarity. Từ đó ta biểu diễn lại công thức:
+
+\[\langle u,s_t \rangle = 
+\gamma \langle u,v_t \rangle+(1-\gamma)\langle u,s_{t-1} \rangle\]
+
+Với $s_t$ là vector trong không gian đặc trưng tương ứng với $score_t$ với $score_t=\langle u,s_t \rangle$. Từ đó dựa trên tính chất tích vô hướng ta có:
+
+\[\langle u,s_t \rangle = 
+\langle u,\gamma v_t + (1-\gamma)s_{t-1} \rangle\]
+
+Từ đó có công thức cho vector $s_t$:
+
+\[s_t = \gamma v_t + (1-\gamma)s_{t-1}\]
+
+Từ đó, có thể dễ dàng tìm kiếm từ vector database. Các không gian đặc trưng sẽ khác nhau tùy theo mô hình embedding sử dụng.
+
+
+
+% \begin{abstract}
+% Giải pháp sử dụng các mô hình học sâu để trích xuất đặc trưng và hiểu ngữ nghĩa của video, giúp cải thiện độ chính xác khi truy xuất từ các tập dữ liệu lớn. Hệ thống kết hợp tìm kiếm dựa trên văn bản và hình ảnh, tăng cường khả năng truy vấn trong các bộ sưu tập video đa dạng. Qua kết quả thử nghiệm, giải pháp có tiềm năng ứng dụng trong các lĩnh vực như đề xuất nội dung và tìm kiếm video.
+% \end{abstract}
+
+% \section{Giải pháp}
+
+% \subsection{Truy vấn dựa trên tìm kiếm tuần tự (Exploitation)}
+% Trước tiên giải pháp embed những keyframe của video thành những vector đặc trưng ($u$). Ở bước truy vấn, trước tiên embed văn bản query thành vector đặc trưng tương ứng ($v_0$). Ở bước thứ $t$ ($t>0$), người dùng chọn ra bức ảnh gần giống mong muốn và lấy được vector đặc trưng, sau đó hệ thống sẽ tính số điểm lại cho toàn bộ keyframe dựa trên exponential smoothing.
+
+% \begin{equation}
+% \begin{split}
+% score_t= &\gamma sim(u,v_t)+(1-\gamma)score_{t-1}\\
+% &\gamma sim(u,v_t )+\gamma(1-\gamma)sim(u,v_{t-1} )+\gamma(1-\gamma)^2 sim(u,v_{t-2} )+\dotsc
+% \end{split}
+% \end{equation}
+
+% Sau thi chuẩn hóa vector đặc trưng, việc tính similarity có thể dùng cosine similarity. Từ đó ta biểu diễn lại công thức:
+
+% \[\langle u,s_t \rangle = 
+% \gamma \langle u,v_t \rangle+(1-\gamma)\langle u,s_{t-1} \rangle\]
+
+% Với $s_t$ là vector trong không gian đặc trưng tương ứng với $score_t$ với $score_t=\langle u,s_t \rangle$. Từ đó dựa trên tính chất tích vô hướng ta có:
+
+% \[\langle u,s_t \rangle = 
+% \langle u,\gamma v_t + (1-\gamma)s_{t-1} \rangle\]
+
+% Từ đó có công thức cho vector $s_t$:
+
+% \[s_t = \gamma v_t + (1-\gamma)s_{t-1}\]
+
+% Từ đó, có thể dễ dàng tìm kiếm từ vector database. Các không gian đặc trưng sẽ khác nhau tùy theo mô hình embedding sử dụng. Giải pháp cũng kết hợp nhiều mô hình khác nhau.
+
+% \subsection{DFN5B-CLIP-ViT-H-14}
+
+% \subsubsection{Tóm tắt}
+
+% Các tập dữ liệu huấn luyện lớn đã trở thành nền tảng của học máy, một phương pháp phổ biến hiện nay là thu thập một khối lượng dữ liệu lớn ngẫu nhiên sau đó thực hiện chọn lọc thông qua một số phương pháp để đưa ra tệp huấn luyện sau cùng.
+
+% Các tập dữ liệu huấn luyện lớn đã trở thành nền tảng của học máy, một phương pháp phổ biến hiện nay là thu thập một khối lượng dữ liệu lớn ngẫu nhiên sau đó thực hiện chọn lọc thông qua một số phương pháp để đưa ra tệp huấn luyện sau cùng. 
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{dfn.png}
+% \caption{Pipeline xây dựng tệp dữ liệu sử dụng DFN}
+% \end{figure}
+
+% \subsubsection{Benchmark}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{dfnben.png}
+% \caption{So sách DFN với các mô hình CLIP khác trên tập ImageNet (Zeroshot)}
+% \end{figure}
+
+% \subsection{BLIP-2}
+
+% \subsubsection{Tóm tắt}
+% \textbf{BLIP-2} là một chiến lược huấn luyện trước dành cho mô hình thị giác-ngôn ngữ, nhằm giảm chi phí huấn luyện các mô hình lớn.
+
+% Phương pháp này sử dụng các bộ mã hóa hình ảnh và mô hình ngôn ngữ lớn đã được huấn luyện sẵn mà không cần huấn luyện lại toàn bộ.
+
+% BLIP-2 kết nối khoảng cách giữa thị giác và ngôn ngữ thông qua một \textbf{Querying Transformer} nhỏ, được huấn luyện qua hai giai đoạn:
+
+% \begin{itemize}
+%   \item Giai đoạn 1: Huấn luyện khả năng biểu diễn thị giác-ngôn ngữ từ một bộ mã hóa hình ảnh đã đóng băng (frozen image encoder).
+%   \item Giai đoạn 2: Huấn luyện khả năng tạo văn bản từ hình ảnh (vision-to-language generative learning) từ một mô hình ngôn ngữ đã đóng băng (frozen language model).
+% \end{itemize}
+
+
+% Kết quả: BLIP-2 đạt hiệu suất tốt nhất trên nhiều tác vụ thị giác-ngôn ngữ, dù có ít tham số huấn luyện hơn so với các phương pháp hiện tại.
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{blip.png}
+% \caption{Kiến trúc của BLIP-2}
+% \end{figure}
+
+
+% \subsubsection{Benchmark}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{blipben.png}
+% \caption{\textbf{Tổng quan về kết quả BLIP-2} trên các tác vụ thị giác-ngôn ngữ zero-shot. So với các mô hình tiên tiến trước đó, BLIP-2 đạt được hiệu suất cao nhất trên các tác vụ zero-shot, đồng thời yêu cầu ít tham số huấn luyện nhất trong quá trình huấn luyện trước thị giác-ngôn ngữ.}
+% \end{figure}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=1\textwidth]{blipben2.png}
+% \caption{So sánh với các phương pháp truy xuất khác, tinh chỉnh trên COCO và chuyển giao zero-shot sang Flickr30K.}
+% \end{figure}
+
+% \subsection{DINO-v2}
+% \subsubsection{Tóm tắt}
+% DINO-v2 được huấn luyện dưới hình thức học tự giám sát. Về mặt dữ liệu, tập dữ liệu hình ảnh huấn luyện  được xây dựng trên quy trình tự động đảm bảo về đa dạng và được chọn lọc thay vì dữ liệu không được chọn lọc như thường thấy trong học tự giám sát. Về mặt mô hình, mô hình ViT với 1 tỷ tham số được huấn luyện và chuyển hóa (\textit{distill}) nó thành một loạt các mô hình nhỏ hơn, vượt qua khả năng của OpenCLIP  trên hầu hết các benchmark ở cấp độ hình ảnh và pixel.
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{dinov2.png}
+% \caption{Quy trình chọn lọc dữ liệu huấn luyện tự động}
+% \end{figure}
+
+% \textbf{Deduplication} được áp dụng Copy Detection Pipeline - ”A Self-Supervised Descriptor for Image Copy Detection” vào bộ dữ liệu chưa chọn lọc, điều này giúp giảm sự trùng lặp và tăng tính đa dạng giữa các hình ảnh.  
+
+% \textbf{Retrieval}  sử dụng mạng ViT-H/16 tự giám sát đã được tiền huấn luyện trên ImageNet-22k, và sử dụng độ tương đồng cosin làm thước đo khoảng cách giữa các hình ảnh, sau đó thực hiện phân cụm k-means trên dữ liệu chưa được chọn lọc. Đối với một tập truy vấn , nếu nó đủ lớn, sẽ truy xuất N (thường là 4) hình ảnh gần nhất cho mỗi hình ảnh truy vấn. Nếu nó nhỏ, sẽ lấy mẫu M hình ảnh từ cụm tương ứng với mỗi hình ảnh truy vấn.
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{dinov2ben.png}
+% \caption{\textbf{Sự tăng trưởng của hiệu suất khi tăng tham số.} DINOv2 (màu xanh đậm),  phương pháp tự giám sát (màu cam nhạt),  phương pháp giám sát yếu (màu hồng đậm).}
+% \end{figure}
+
+
+% \subsection{Co-DETR}
+% \subsubsection{Tóm tắt}
+% Co-DETR (Collaborative Object Detection Transformer) là một trong những mô hình hàng đầu trong giải quyết bài toán object detection nhờ các đặc điểm nổi bật như:
+
+% \begin{itemize}
+%     \item \textbf{Collaborative Queries} và \textbf{Query Decomposition}, cho phép mô hình xử lý nhiều truy vấn đối tượng đồng thời và tập trung vào các đặc điểm riêng biệt của từng đối tượng.
+%     \item \textbf{Multi-scale Attention} và \textbf{Cross Attention}, giúp mô hình phát hiện đối tượng ở nhiều kích thước khác nhau và tinh chỉnh việc chú ý vào các khu vực liên quan trong hình ảnh.
+%     \item \textbf{End-to-End Training}, không cần các bước xử lý hậu kỳ như \textbf{Non-Maximum Suppression}, giúp quy trình phát hiện đối tượng trở nên đơn giản và hiệu quả hơn.
+%     \item Tổng quát hóa tốt hơn, đặc biệt trong các tình huống đối tượng bị che khuất hoặc chồng lấn.
+%     \item Tương thích với các \textbf{backbone CNN và ViT} mạnh mẽ, cho phép cải thiện hiệu suất linh hoạt.
+% \end{itemize}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{codetr.png}
+% \caption{Framework trong huấn luyện}
+% \end{figure}
+
+% \subsubsection{Benchmark}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=1\textwidth]{codetrben1.png}
+% \caption{So sánh với các biến thể DETR trên tập COCO.}
+% \end{figure}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{codetrben2.png}
+% \caption{So sánh với các framework SOTA trên tập COCO}
+% \end{figure}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{codetrben3.png}
+% \caption{So sánh với các framework SOTA trên tập LVIS.}
+% \end{figure}
+
+% \subsection{TrOCR}
+
+% \subsubsection{Kiến trúc}
+% \begin{itemize}
+% \item \textbf{Vision Encoder (ViT-based):} TrOCR sử dụng Vision Transformer (ViT) làm nền tảng cho bộ mã hóa ảnh. Bộ mã hóa này xử lý các ảnh đầu vào (chứa văn bản) và chuyển chúng thành các đặc trưng hình ảnh. ViT giúp mô hình nắm bắt được chi tiết hình ảnh phong phú, làm cho nó trở nên mạnh mẽ trong việc xử lý các bố cục văn bản phức tạp hoặc bị méo mó.
+% \item \textbf{Text Decoder (GPT-like):} Phía bộ giải mã, TrOCR sử dụng một kiến trúc giống GPT, được huấn luyện trước, để tạo văn bản từ các đặc trưng hình ảnh. Bộ giải mã này là autoregressive, tức là dự đoán từng ký tự một dựa trên các ký tự trước đó, làm cho nó phù hợp cho việc tạo văn bản theo trình tự.
+% \item \textbf{End-to-End Approach:} Không giống như các hệ thống OCR truyền thống chia nhỏ nhiệm vụ thành nhiều giai đoạn (ví dụ: phát hiện văn bản theo sau là nhận dạng), TrOCR thực hiện nhận dạng văn bản toàn diện trực tiếp từ hình ảnh đầu vào.
+% \end{itemize}
+
+% \subsubsection{Những cải tiến chính}
+% \begin{itemize}
+% \item \textbf{Pre-trained Transformer Models:} TrOCR tận dụng pre-training trên các tập dữ liệu lớn, đặc biệt là sử dụng các mô hình như ViT để mã hóa hình ảnh và GPT-2 để giải mã văn bản. Điều này cho phép mô hình được hưởng lợi từ lượng lớn dữ liệu hình ảnh và ngôn ngữ, cải thiện hiệu suất tổng quát hóa và nhận dạng.
+% \item \textbf{Adaptation to Scene Text Recognition:} TrOCR đặc biệt phù hợp để nhận dạng văn bản trong các cảnh tự nhiên hoặc bố cục tài liệu phức tạp, nhờ khả năng xử lý nhiều loại hình ảnh khác nhau và căn chỉnh chúng với các mô hình ngôn ngữ một cách hiệu quả.
+% \end{itemize}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{ocr1.png}
+% \caption{Kết quả đánh giá (word-level Precision, Recall,F1) trên tập dữ liệu SROIE.}
+% \end{figure}
+
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.8\textwidth]{ocr2.png}
+% \caption{Thời gian chạy trên tập dữ liệu chữ viết tay IAM.}
+% \end{figure}
+
+% \section{Hệ thống}
+
+\end{document}
