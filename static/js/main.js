@@ -294,7 +294,9 @@ function bbox_submit(e, include_text=false){
 
 // FACK GLOBAL: window.defaultPaletteBox = document.getElementsByClassName("dragbox")[0];
 function loadPallete(){
-    var palette_list = ['person','man','woman','human_face','musical_instrument','sports','skateboard','glasses','bicycle','motorcycle','car','truck','boat','parachute','airplane','bench','chair','sofa','building','umbrella','wine_glass','cup','dessert','cell_phone','television','laptop_computer','book','cat','dog','horse','bird','flower','tree']
+    // var palette_list = ['person','man','woman','human_face','musical_instrument','sports','skateboard','glasses','bicycle','motorcycle','car','truck','boat','parachute','airplane','bench','chair','sofa','building','umbrella','wine_glass','cup','dessert','cell_phone','television','laptop_computer','book','cat','dog','horse','bird','flower','tree']
+    var palette_list = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant', 'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat', 'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket', 'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush']
+    // alert(palette_list.length)
     palette_place = document.getElementById('palette-place')
     for (const [_,palette_name] of palette_list.entries()){
         let palette = document.createElement('div')
@@ -302,7 +304,7 @@ function loadPallete(){
         palette.setAttribute('palette_name',palette_name)
         palette.innerHTML = ''
         palette.innerHTML += `<span id="close-btn" class="close-btn" onclick="this.parentElement.remove()" hidden="">×</span>`
-        palette.innerHTML += `<img draggable="true" ondragstart="dragPalette(event)" width="100%" height="100%" id="palette-img" src="concac/palette/${palette_name}.png">`
+        palette.innerHTML += `<img draggable="true" ondragstart="dragPalette(event)" width="100%" height="100%" id="palette-img" src="concac/cocoicons/${palette_name}.jpg">`
         palette_place.appendChild(palette)
     }
     window.defaultPaletteBox = document.getElementsByClassName("dragbox")[2]
