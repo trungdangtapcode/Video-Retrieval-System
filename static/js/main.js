@@ -93,6 +93,7 @@ for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
                 && form['query_type'].value != 'text_ivt'
                 && form['query_type'].value != 'texttext_ivt'
                 && form['query_type'].value != 'beit'
+                && form['query_type'].value != 'beitbeit'
             ){
                 form['query_type'].value = 'text'
             }
@@ -174,6 +175,12 @@ function queryByIdx(idx){
     addParam("idx_query",idx)
     form = document.getElementById('request')
     form['query_type'].value = 'idx'
+    submit()
+}
+function queryByIdxBEIT(idx){
+    addParam("idx_query",idx)
+    form = document.getElementById('request')
+    form['query_type'].value = 'beit_idx'
     submit()
 }
 function queryByIdxDinov2(idx){
@@ -446,6 +453,35 @@ function translate(text){
     request.open("GET", "translate?"+params, false);
     request.send(null)
     return request.responseText
+}
+
+function getInternTextFeatures(originalString){
+    let encodedString = encodeURIComponent(originalString);
+    let url = intern_url + 'text/' + encodedString
+    console.log(url)
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, false);
+    xhr.setRequestHeader('ngrok-skip-browser-warning', '69420');
+    xhr.send();
+    value = JSON.parse(xhr.responseText);
+    console.log(value)
+}
+
+function internQuery(){
+    let boxes = document.getElementsByTagName('textarea')
+    text = boxes[0].value
+    if (test===''){
+        return
+    }
+    feat = getInternTextFeatures(text)
+    addParam("intern_query",feat)
+    form = document.getElementById('request')
+    if (form['query_type'].value != 'text_ivs' && form['query_type'].value != 'text_ivt'
+        && form['query_type'].value != 'texttext_ivt'
+    ){
+        form['query_type'].value = 'text_ivt'
+    }
+    submit()
 }
 
 document.getElementById("num-show-query").addEventListener("change", function() { 

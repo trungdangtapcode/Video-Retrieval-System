@@ -11,6 +11,7 @@ import utils.co_detr
 import utils.translate
 import utils.dres_submit
 import utils.asr
+import utils.beit
 import json
 import numpy as np
 import validators
@@ -40,9 +41,10 @@ DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/ocr_batch3/whoosh_dir"
+OCR_CORPUS_PATH = "../preprocess/ocr_batch3/OCR_combined_all.json"
 ASR_WHOOSH_PATH = "../preprocess/ytb/whooshdir4"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_3"
-CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_batch12.json"
+CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_mscoco.json"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapping3/map-keyframes.json"
 INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch3/intern_4scenes_mapping_all.json"
 INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch3/intern_1scene_mapping_all.json"
@@ -50,7 +52,9 @@ CHUNK_SIZE = 1024 * 1024
 EVAL_ID = "69ec2262-d829-4ac1-94a2-1aa0a6693266"
 SESSION_ID = "2MUL165u1Zl0yjefkhOiNobfj8-YW6yV"
 ASR_MAPPING_PATH = '../preprocess/ytb/asr_mapping.json'
+BEIT_URL_SERVER = 'https://ed94-34-168-115-246.ngrok-free.app'
 
+utils.beit.URL_SERVER = BEIT_URL_SERVER
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.embeddingserver.EMBEDDING_SERVER_INTERNVIDEO = EMBEDDING_SERVER_INTERNVIDEO
 utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
@@ -66,6 +70,7 @@ utils.asr.ASR_MAPPING_PATH = ASR_MAPPING_PATH
 utils.asr.init()
 
 od_corpus = json.load(open(CODETR_COPUS_DIRECTORY))
+ocr_corpus = json.load(open(OCR_CORPUS_PATH))
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -124,7 +129,9 @@ async def home(request: Request, scene_description: str|None = '',
             last_newold: str|None = 'newold',
             model_name: str|None = 'CLIP', 
             ocr_query: str|None = '',
-            asr_query: str|None = ''):
+            asr_query: str|None = '',
+            intern_query: str|None = ''):
+    print(intern_query)
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
@@ -188,6 +195,27 @@ async def home(request: Request, scene_description: str|None = '',
     if (query_type=='asr' and asr_query != ''):
         img_idx = utils.asr.get_ocr(asr_query, num_clip_query)
         scores = list(range(len(img_idx),0,-1))
+    if (query_type=='beit' and scene_description != None and scene_description != ''):
+        img_idx, scores = utils.beit.text_seach(scene_description, num_clip_query)
+    if (query_type=='beitbeit' and
+        scene_description != None and scene_description != '' and
+        next_scene_description != None and next_scene_description != ''):
+        k1 = 1800
+        k2 = 1500
+        assert k1*k2 >= num_show_query
+        img_idx1, scores1 = utils.beit.text_seach(scene_description, k1)
+        img_idx2, scores2 = utils.beit.text_seach(next_scene_description, k2)
+        print("QUERY OK.. start compare (intern)")
+        img_idx, scores = utils.metric_2_ids(img_idx1, scores1, img_idx2, scores2, 
+                            num_clip_query, keyframes_mapping)
+    if (query_type=='beit_idx' and idx_query != None):
+        img_idx, scores = utils.beit.index_search(idx_query,num_clip_query)
+    # if (query_type=='text_ocr' and scene_description != None and scene_description != ''):
+    #     k1 = 3000
+    #     img_idx1, scores1 = utils.beit.text_seach(scene_description, k1)
+    #     print("QUERY OK.. start compare (ocr)", scene_description, ocr_query)
+    #     img_idx, scores = utils.metric_2_ids_text_od(img_idx1, ocr_query, ocr_corpus , num_clip_query)
+
 
     data = []
     if (not img_idx is None):
@@ -218,6 +246,7 @@ async def home(request: Request, scene_description: str|None = '',
                 "next_scene_description": next_scene_description,
                 "last_displayStyle": last_displayStyle,
                 "last_newold": last_newold,
+                "intern_url": EMBEDDING_SERVER_INTERNVIDEO,
                 "data_response": json.dumps(data, cls=NpEncoder)}
         , data = "con cac"
     )
