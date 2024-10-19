@@ -434,6 +434,43 @@ shortcut.add("CTRL+S", function(event) {
   submit.send();
   show_toast();
 });
+shortcut.add("CTRL+K", function(event) {
+  var kframe = video_keyframes_id[id]
+  submit = new XMLHttpRequest();
+  var params = `idx=${kframe}&isKeyframe=true`
+  submit.open("POST", "/submit_dres_kis?" + params, false);
+  submit.send();
+  output = JSON.parse(submit.responseText)
+  if (output['status']){
+    if (output['submission']=="WRONG"){
+      toastr.error('WRONG ANSWER');
+    } else {
+      toastr.success('CORRECT ANSWER');
+    }
+  }
+  else{
+    toastr.error('An error occured '+ JSON.stringify(output));
+  }
+});
+shortcut.add("CTRL+L", function(event) {
+  qa = prompt("Enter the QA")
+  var kframe = video_keyframes_id[id]
+  submit = new XMLHttpRequest();
+  var params = `idx=${kframe}&isKeyframe=true&qa=${qa}`
+  submit.open("POST", "/submit_dres_qa?" + params, false);
+  submit.send();
+  output = JSON.parse(submit.responseText)
+  if (output['status']){
+    if (output['submission']=="WRONG"){
+      toastr.error('WRONG ANSWER');
+    } else {
+      toastr.success('CORRECT ANSWER');
+    }
+  }
+  else{
+    toastr.error('An error occured '+ JSON.stringify(output));
+  }
+});
 
 function show_toast(){
   toastr.success('Frame saved successfully');

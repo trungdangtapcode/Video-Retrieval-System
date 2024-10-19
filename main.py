@@ -3,12 +3,14 @@ from fastapi import FastAPI, File, Form, Header, Request, UploadFile, status, Re
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import utils.asr
 import utils.myfaiss
 import utils.embeddingserver
 import utils.ocr
 import utils.co_detr
 import utils.translate
 import utils.dres_submit
+import utils.asr
 import json
 import numpy as np
 import validators
@@ -37,15 +39,17 @@ KEYFRAMES_JSON = "../preprocess/keyframespath_batch3.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
-OCR_WHOOSH_PATH = "../preprocess/whooshdir_batch12"
+OCR_WHOOSH_PATH = "../preprocess/ocr_batch3/whoosh_dir"
+ASR_WHOOSH_PATH = "../preprocess/ytb/whooshdir4"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_3"
 CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_batch12.json"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapping3/map-keyframes.json"
 INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch3/intern_4scenes_mapping_all.json"
 INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch3/intern_1scene_mapping_all.json"
 CHUNK_SIZE = 1024 * 1024
-EVAL_ID = ""
-SESSION_ID = ""
+EVAL_ID = "69ec2262-d829-4ac1-94a2-1aa0a6693266"
+SESSION_ID = "2MUL165u1Zl0yjefkhOiNobfj8-YW6yV"
+ASR_MAPPING_PATH = '../preprocess/ytb/asr_mapping.json'
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.embeddingserver.EMBEDDING_SERVER_INTERNVIDEO = EMBEDDING_SERVER_INTERNVIDEO
@@ -56,6 +60,10 @@ utils.co_detr.init()
 
 utils.dres_submit.evaluationID = EVAL_ID
 utils.dres_submit.sessionID = SESSION_ID
+
+utils.asr.ASR_WHOOSH_PATH = ASR_WHOOSH_PATH
+utils.asr.ASR_MAPPING_PATH = ASR_MAPPING_PATH
+utils.asr.init()
 
 od_corpus = json.load(open(CODETR_COPUS_DIRECTORY))
 
@@ -114,7 +122,9 @@ async def home(request: Request, scene_description: str|None = '',
             next_scene_description: str|None = '',
             last_displayStyle: str|None = 'grid',
             last_newold: str|None = 'newold',
-            model_name: str|None = 'CLIP', string_query: str|None = ''):
+            model_name: str|None = 'CLIP', 
+            ocr_query: str|None = '',
+            asr_query: str|None = ''):
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
@@ -134,8 +144,8 @@ async def home(request: Request, scene_description: str|None = '',
         img_idx, scores = db.idx_search(idx_query,num_clip_query, model_name)
     if (query_type=='dinov2' and idx_query != None):
         img_idx, scores = db.idx_dinov2_search(idx_query,num_clip_query)
-    if (query_type=='ocr' and string_query != ''):
-        img_idx = utils.ocr.get_ocr(string_query, num_clip_query)
+    if (query_type=='ocr' and ocr_query != ''):
+        img_idx = utils.ocr.get_ocr(ocr_query, num_clip_query)
         scores = list(range(len(img_idx),0,-1))
     if (query_type=='od' and od_query != ''):
         img_idx, scores = utils.co_detr.get_top_k(od_query, num_clip_query)    
@@ -175,6 +185,9 @@ async def home(request: Request, scene_description: str|None = '',
         print("QUERY OK.. start compare (od)", scene_description, od_query)
         # print(img_idx1[:10], img_idx2[:10])
         img_idx, scores = utils.metric_2_ids_text_od(img_idx1, od_query, od_corpus , num_clip_query)
+    if (query_type=='asr' and asr_query != ''):
+        img_idx = utils.asr.get_ocr(asr_query, num_clip_query)
+        scores = list(range(len(img_idx),0,-1))
 
     data = []
     if (not img_idx is None):
@@ -199,7 +212,8 @@ async def home(request: Request, scene_description: str|None = '',
                 "query_type": query_type, 
                 "idx_query": idx_query,
                 "model_name": model_name,
-                "string_query": string_query,
+                "asr_query": asr_query,
+                "ocr_query": ocr_query,
                 "num_show_query": num_show_query,
                 "next_scene_description": next_scene_description,
                 "last_displayStyle": last_displayStyle,
@@ -339,6 +353,25 @@ async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None =
         data = video[:-4] +',' + str(idx)+'\n'
         f.write(data)
     return 'submit ok'
+
+@app.post("/submit_dres_kis")
+async def submit(request: Request, idx: int, isKeyframe: bool, video: str|None = None):
+    if (isKeyframe):
+        video = keyframes_mapping[idx]['video']
+        idx = keyframes_mapping[idx]['timestamp']*1000
+    else:
+        assert(video != None)
+    return utils.dres_submit.submit_kis(video[:-4], idx)
+
+@app.post("/submit_dres_qa")
+async def submit(request: Request, idx: int, isKeyframe: bool, qa: str, video: str|None = None):
+    if (isKeyframe):
+        video = keyframes_mapping[idx]['video']
+        idx = keyframes_mapping[idx]['timestamp']*1000
+    else:
+        assert(video != None)
+    answer_qa = str(qa)+'-'+str(video[:-4])+'-'+str(idx)
+    return utils.dres_submit.submit_qa(answer_qa)
 
 @app.get("/translate")
 async def translate(request: Request, text: str, dest: str = 'en', src = 'vi'):

@@ -129,6 +129,47 @@
         submit.send()
         toastr.success(`${frame} saved successfully`);
     });
+    shortcut.add("CTRL+K", function(event) {
+        frame = Math.floor(video.currentTime * fps)
+        milisec = Math.floor(video.currentTime * 1000)
+        submit = new XMLHttpRequest();
+        title = '{{title}}'
+        var params = `idx=${milisec}&isKeyframe=false&video=${title}`
+        submit.open("POST", "/submit_dres_kis?" + params, false);
+        submit.send()
+        output = JSON.parse(submit.responseText)
+        if (output['status']){
+            if (output['submission']=="WRONG"){
+            toastr.error('WRONG ANSWER');
+            } else {
+            toastr.success('CORRECT ANSWER');
+            }
+        }
+        else{
+            toastr.error('An error occured '+ JSON.stringify(output));
+        }
+    });
+    shortcut.add("CTRL+L", function(event) {
+        qa = prompt("Enter the QA")
+        frame = Math.floor(video.currentTime * fps)
+        milisec = Math.floor(video.currentTime * 1000)
+        submit = new XMLHttpRequest();
+        title = '{{title}}'
+        var params = `idx=${milisec}&isKeyframe=false&video=${title}&qa=${qa}`
+        submit.open("POST", "/submit_dres_qa?" + params, false);
+        submit.send()
+        output = JSON.parse(submit.responseText)
+        if (output['status']){
+            if (output['submission']=="WRONG"){
+            toastr.error('WRONG ANSWER');
+            } else {
+            toastr.success('CORRECT ANSWER');
+            }
+        }
+        else{
+            toastr.error('An error occured '+ JSON.stringify(output));
+        }
+    });
     function show_toast(){
     }
     setInterval(showtime, 1000/fps)

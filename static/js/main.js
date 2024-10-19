@@ -92,6 +92,7 @@ for (let i = 0; i < document.getElementsByTagName('textarea').length; i++){
                 && form['query_type'].value != 'text_ivs'
                 && form['query_type'].value != 'text_ivt'
                 && form['query_type'].value != 'texttext_ivt'
+                && form['query_type'].value != 'beit'
             ){
                 form['query_type'].value = 'text'
             }
@@ -115,6 +116,14 @@ document.getElementById('url-textbox').addEventListener("keypress", (e) => {
         submit(e);
     }
 }) 
+document.getElementById('asr-box').addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        form = document.getElementById('request')
+        form['query_type'].value = 'asr'
+        submit(e);
+    }
+})  
 
 function changeDisplayStyle() {
     if (displayStyle=='keyframe'){
