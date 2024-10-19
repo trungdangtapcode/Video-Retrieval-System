@@ -3,7 +3,8 @@ import Stemmer  # optional: for stemming
 import numpy as np
 stemmer = Stemmer.Stemmer("english")
 
-bm25_mapping = list(range(106589)) + list(range(298000,298000+94657))
+bm25_mapping = list(range(106589)) + list(range(298000,298000+94657)) +\
+    list(range(765106,765106+151318))
 
 DIRECTORY_INDEX = ''
 retriever = None

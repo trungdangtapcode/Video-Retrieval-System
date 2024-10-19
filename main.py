@@ -8,6 +8,7 @@ import utils.embeddingserver
 import utils.ocr
 import utils.co_detr
 import utils.translate
+import utils.dres_submit
 import json
 import numpy as np
 import validators
@@ -27,22 +28,24 @@ def check_valid_url(url):
 EMBEDDING_SERVER = "http://26.48.117.115:80/"
 EMBEDDING_SERVER_INTERNVIDEO = 'http://192.168.195.190:8000/'
 BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
-BIN_CLIP_PATH = "../preprocess/clip12_new.index"
+BIN_CLIP_PATH = "../preprocess/embed_batch3/clip_all.index"
 BIN_CLIP_PATH_OLDKEYFRAME = "../preprocess/clip12_oldonly.index"
-BIN_DINOV2_PATH = "../preprocess/dino12_new.index"
-BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch2/space_batch12.index"
-BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch2/time_batch12.index"
-KEYFRAMES_JSON = "../preprocess/keyframespath12_new.json"
+BIN_DINOV2_PATH = "../preprocess/embed_batch3/dino_all.index"
+BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch3/intern_4scenes_all.index"
+BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch3/intern_1scene_all.index"
+KEYFRAMES_JSON = "../preprocess/keyframespath_batch3.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
 RESIZED_PATH = DATA_PATH+"/keyframes_resized"
 OCR_WHOOSH_PATH = "../preprocess/whooshdir_batch12"
-CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_batch12"
+CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_3"
 CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_batch12.json"
-KEYFRAMES_MAPPING_PATH = "../preprocess/mapkeyframes12_new.json"
-INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch2/internSpace2_to_index.json"
-INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch2/internTime2_to_index.json"
+KEYFRAMES_MAPPING_PATH = "../preprocess/mapping3/map-keyframes.json"
+INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch3/intern_4scenes_mapping_all.json"
+INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch3/intern_1scene_mapping_all.json"
 CHUNK_SIZE = 1024 * 1024
+EVAL_ID = ""
+SESSION_ID = ""
 
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
 utils.embeddingserver.EMBEDDING_SERVER_INTERNVIDEO = EMBEDDING_SERVER_INTERNVIDEO
@@ -50,6 +53,9 @@ utils.ocr.OCR_WHOOSH_PATH = OCR_WHOOSH_PATH
 utils.ocr.init()
 utils.co_detr.DIRECTORY_INDEX = CODETR_DIRECTORY
 utils.co_detr.init()
+
+utils.dres_submit.evaluationID = EVAL_ID
+utils.dres_submit.sessionID = SESSION_ID
 
 od_corpus = json.load(open(CODETR_COPUS_DIRECTORY))
 
@@ -64,8 +70,8 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
-    BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH,BIN_CLIP_PATH_OLDKEYFRAME)
+# db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
+#     BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH,BIN_CLIP_PATH_OLDKEYFRAME)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
