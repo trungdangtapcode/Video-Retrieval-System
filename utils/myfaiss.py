@@ -22,8 +22,8 @@ class FaissDB:
         self.indexCLIP = faiss.index_cpu_to_gpu_multiple_py(resource, tmp)
         del tmp
         self.index_dinov2 = faiss.read_index(bin_file_path_DINOv2)
-        self.index_intervideo_space = faiss.read_index(bin_file_path_internVideo_space)
-        self.index_intervideo_time = faiss.read_index(bin_file_path_internVideo_time)
+        # self.index_intervideo_space = faiss.read_index(bin_file_path_internVideo_space)
+        # self.index_intervideo_time = faiss.read_index(bin_file_path_internVideo_time)
         # self.index_intervideo_space = faiss.index_cpu_to_gpu_multiple_py(resource, self.index_intervideo_space)
         # self.index_intervideo_time = faiss.index_cpu_to_gpu_multiple_py(resource, self.index_intervideo_time)
         # self.model, _ = clip.load(clip_backbone, device=device)
@@ -149,6 +149,37 @@ class FaissDB:
 
         return idx_image, scores
     
+    def text_search_internvideo_space_p(self, text: str, k: int, mapping):
+        text_features = np_decode(text)
+        norm = np.linalg.norm(text_features)
+        if (norm!=0):
+            text_features /= norm
+        
+        scores, idx_image = self.index_intervideo_space.search(text_features, k=k)
+        idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
+        for i in range(len(idx_image)):
+            idx_image[i] = mapping[idx_image[i]]
+
+        return idx_image, scores
+    
+    def text_search_internvideo_time_p(self, text: str, k: int, mapping):
+        text_features = np_decode(text)
+        norm = np.linalg.norm(text_features)
+        if (norm!=0):
+            text_features /= norm
+        
+        scores, idx_image = self.index_intervideo_time.search(text_features, k=k)
+        idx_image = idx_image.squeeze()
+        scores = scores.squeeze()
+        # print('NAME',[tmp[x] for x in idx_image[:10]])
+        print('BEFORE',idx_image[:10])
+        for i in range(len(idx_image)):
+            idx_image[i] = mapping[idx_image[i]]
+        print('AFTER',idx_image[:10])
+
+        return idx_image, scores
+    
     def text_search_oldkeyframe(self, text: str, k: int):
         text_features = text_feature(text, 'CLIP')
         norm = np.linalg.norm(text_features)
@@ -162,3 +193,9 @@ class FaissDB:
         assert np.isnan(scores).any()==False
 
         return idx_image, scores
+    
+import pickle
+import codecs
+def np_decode(text):
+    unpickled = pickle.loads(codecs.decode(text.encode(), "base64"))
+    return unpickled

@@ -465,12 +465,13 @@ function getInternTextFeatures(originalString){
     xhr.send();
     value = JSON.parse(xhr.responseText);
     console.log(value)
+    return value
 }
 
 function internQuery(){
     let boxes = document.getElementsByTagName('textarea')
     text = boxes[0].value
-    if (test===''){
+    if (text===''){
         return
     }
     feat = getInternTextFeatures(text)

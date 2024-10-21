@@ -34,8 +34,10 @@ BIN_ALIGN_PATH = "../preprocess/normalizedALIGN.index"
 BIN_CLIP_PATH = "../preprocess/embed_batch3/clip_all.index"
 BIN_CLIP_PATH_OLDKEYFRAME = "../preprocess/clip12_oldonly.index"
 BIN_DINOV2_PATH = "../preprocess/embed_batch3/dino_all.index"
-BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch3/intern_4scenes_all.index"
-BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch3/intern_1scene_all.index"
+# BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch3/intern_4scenes_all.index"
+# BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch3/intern_1scene_all.index"
+BIN_INTERVIDEO_SPACE_PATH = "../preprocess/intern_batch2/space_batch12.index"
+BIN_INTERVIDEO_TIME_PATH = "../preprocess/intern_batch2/time_batch2.index"
 KEYFRAMES_JSON = "../preprocess/keyframespath_batch3.json"
 DATA_PATH = "../data"
 KEYFRAMES_PATH = DATA_PATH+"/keyframes"
@@ -46,13 +48,15 @@ ASR_WHOOSH_PATH = "../preprocess/ytb/whooshdir4"
 CODETR_DIRECTORY = "../preprocess/codetr/index_bm25_corpus_3"
 CODETR_COPUS_DIRECTORY = "../preprocess/codetr/Co-DETR_mscoco.json"
 KEYFRAMES_MAPPING_PATH = "../preprocess/mapping3/map-keyframes.json"
-INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch3/intern_4scenes_mapping_all.json"
-INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch3/intern_1scene_mapping_all.json"
+# INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch3/intern_4scenes_mapping_all.json"
+# INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch3/intern_1scene_mapping_all.json"
+INTERNVIDEO_SPACE_MAP_PATH = "../preprocess/intern_batch2/internSpace2_to_index.json"
+INTERNVIDEO_TIME_MAP_PATH = "../preprocess/intern_batch2/internTime2_to_index.json"
 CHUNK_SIZE = 1024 * 1024
-EVAL_ID = "69ec2262-d829-4ac1-94a2-1aa0a6693266"
-SESSION_ID = "2MUL165u1Zl0yjefkhOiNobfj8-YW6yV"
+EVAL_ID = "a5103664-cf48-4705-9536-3dbd84a81620"
+SESSION_ID = "u1K-_oNPFliQ_4Pi5wVd37pErWZR-54k"
 ASR_MAPPING_PATH = '../preprocess/ytb/asr_mapping.json'
-BEIT_URL_SERVER = 'https://ed94-34-168-115-246.ngrok-free.app'
+BEIT_URL_SERVER = 'https://f39a-34-127-60-122.ngrok-free.app'
 
 utils.beit.URL_SERVER = BEIT_URL_SERVER
 utils.embeddingserver.EMBEDDING_SERVER = EMBEDDING_SERVER
@@ -83,8 +87,8 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 app = FastAPI()
-# db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
-#     BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH,BIN_CLIP_PATH_OLDKEYFRAME)
+db = utils.myfaiss.FaissDB(BIN_ALIGN_PATH,BIN_CLIP_PATH,BIN_DINOV2_PATH, 
+    BIN_INTERVIDEO_SPACE_PATH, BIN_INTERVIDEO_TIME_PATH,BIN_CLIP_PATH_OLDKEYFRAME)
 
 with open('thumbnail_path.json') as json_file: #tam thoi
     json_dict = json.load(json_file)
@@ -131,7 +135,6 @@ async def home(request: Request, scene_description: str|None = '',
             ocr_query: str|None = '',
             asr_query: str|None = '',
             intern_query: str|None = ''):
-    print(intern_query)
     img_idx = None
     global uploaded_img
     if (query_type=='image' and uploaded_img != None):
@@ -169,8 +172,10 @@ async def home(request: Request, scene_description: str|None = '',
                             num_clip_query, keyframes_mapping)
     if (query_type=='text_ivs' and scene_description != None and scene_description != ''):
         img_idx, scores = db.text_search_internvideo_space(scene_description, num_clip_query, internvideo_space_map_index)
+        # img_idx, scores = db.text_search_internvideo_space_p(intern_query, num_clip_query, internvideo_space_map_index)
     if (query_type=='text_ivt' and scene_description != None and scene_description != ''):
-        img_idx, scores = db.text_search_internvideo_time(scene_description, num_clip_query, internvideo_time_map_index)
+        # img_idx, scores = db.text_search_internvideo_time(scene_description, num_clip_query, internvideo_time_map_index)
+        img_idx, scores = db.text_search_internvideo_time_p(intern_query, num_clip_query, internvideo_time_map_index)
     if (query_type=='texttext_ivt' and 
         scene_description != None and scene_description != '' and
         next_scene_description != None and next_scene_description != ''):
@@ -178,6 +183,8 @@ async def home(request: Request, scene_description: str|None = '',
         k1 = 1800
         k2 = 1500
         assert k1*k2 >= num_show_query
+        # img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
+        # img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
         img_idx1, scores1 = db.text_search_internvideo_time(scene_description, k1, internvideo_time_map_index)
         img_idx2, scores2 = db.text_search_internvideo_time(next_scene_description, k2, internvideo_time_map_index)
         print("QUERY OK.. start compare (intern)")
@@ -454,3 +461,15 @@ async def test_embedding():
     vec = utils.embeddingserver.text_feature("I love you baby")
     return json.dumps(vec, cls=NpEncoder)
 
+@app.get("/update_id")
+async def update_id(eval: str,  session: str):
+    EVAL_ID = eval
+    SESSION_ID = session
+    utils.dres_submit.evaluationID = EVAL_ID
+    utils.dres_submit.sessionID = SESSION_ID
+    return 'ok'
+
+@app.get("/update_url")
+async def update_url(url: str):
+    BEIT_URL_SERVER = url 
+    utils.beit.URL_SERVER = BEIT_URL_SERVER
